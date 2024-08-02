@@ -105,6 +105,9 @@ class DeudoresController extends Controller
         }
 
         DB::commit();
+
+        //Devolvemos el ID del pago creado
+        return response()->json(['success' => true, 'orden_id' => $pagoEnc->id]);
     } catch (\Exception $e) {
         DB::rollBack();
         return response()->json(['error' => $e->getMessage()], 400);
