@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\ClienteModel;
+use App\Models\CxcDocumentoModel;
+use App\Models\PagoDetModel;
+use App\Models\FormaPago;
+use App\Models\cuentaBancariaModel;
+use App\Models\PagoEnc;
+use Illuminate\Support\Facades\DB;
+
+class DeudoresController extends Controller
+{
+    //DE PREFERENCIA CARGAR LO QUE NECESITAMOS DE UNA VEZ CON EL INDEX (CLIENTE PENDIENTE DE MODIFICAR)
+    public function index()
+    {
+        $clientes = ClienteModel::all();
+        $formasPago = FormaPago::all();
+        $cuentasBancarias = cuentaBancariaModel::all();
+        return view('deudores.index', compact('clientes', 'formasPago', 'cuentasBancarias'));
+    }
+
+    public function getDocumentosDeudores($idCliente)
+    {
+        $documentos = CxcDocumentoModel::where('idCliente', $idCliente)
+            ->where('saldoDocto', '>', 0)->get();
+        return response()->json($documentos);
+    }
+
+    public function getPagosAplicados($idDocumento)
+    {
+        // Obtener pagos aplicados para un documento específico
+        $pagosAplicados = PagoDetModel::where('ID_CXC', $idDocumento)
+            ->with(['pagoEnc.formaPago'])
+            ->get();
+        // Retornar los datos en formato JSON
+        return response()->json($pagosAplicados);
+    }
+
+    public function store(Request $request)
+{
+    $clienteId = $request->input('cliente_id');
+    $formaPago = $request->input('forma_pago');
+    $fechaContabilizacion = $request->input('fecha_contabilizacion');
+    $referencia = $request->input('referencia');
+    $montoTotal = $request->input('monto_total');
+    $documentosSeleccionados = $request->input('documentos_seleccionados');
+    $numeroDocumento = $request->input('numero_documento');
+    $cuentaBancaria = $request->input('cuenta_bancaria');
+
+    DB::beginTransaction();
+
+    try {
+        // Crear registro en PAGO_ENC
+        $pagoEnc = PagoEnc::create([
+            'idCliente' => $clienteId,
+            'idPago' => $formaPago,
+            'fecha' => $fechaContabilizacion,
+            'referencia' => $referencia,
+            'monto' => $montoTotal,
+            'NRO_DOCTO_BANCARIO' => in_array($formaPago, [3, 4]) ? $numeroDocumento : null,
+            'ID_CUENTA_BANCARIA' => in_array($formaPago, [3, 4]) ? $cuentaBancaria : null
+        ]);
+
+        // Ordenar documentos seleccionados por fecha en orden ascendente
+        usort($documentosSeleccionados, function ($a, $b) {
+            return strtotime($a['fechaDocto']) - strtotime($b['fechaDocto']);
+        });
+
+        // Procesar documentos seleccionados
+        foreach ($documentosSeleccionados as $documento) {
+            $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
+            $montoAplicado = min($documento['saldo'], $montoTotal);
+
+            if ($montoAplicado > 0) {
+                $cxcDocumento->saldoDocto -= $montoAplicado;
+                $cxcDocumento->nroPagos += 1;
+                $cxcDocumento->totalAcumuladoPagos += $montoAplicado;
+
+                if ($cxcDocumento->saldoDocto < 0) {
+                    throw new \Exception("El saldo del documento no puede ser negativo.");
+                }
+
+                $cxcDocumento->save();
+
+                PagoDetModel::create([
+                    'ID_CXC_PAGO' => $pagoEnc->id,
+                    'ID_CXC' => $cxcDocumento->id,
+                    'monto_aplicado' => $montoAplicado
+                ]);
+
+                $montoTotal -= $montoAplicado;
+
+                if ($montoTotal <= 0) {
+                    break;
+                }
+            }
+        }
+
+        // Verificar si el monto total no se ha agotado completamente
+        if ($montoTotal > 0) {
+            throw new \Exception("El monto total a aplicar excede el monto disponible.");
+        }
+
+        DB::commit();
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+
+    return response()->json(['success' => true], 200);
+}
+
+    
+}
