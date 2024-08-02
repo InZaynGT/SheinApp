@@ -389,13 +389,13 @@ return [
             'submenu' => [
                 [
                     'text' => 'Bancos',
-                    'url'  => '#',
+                    'url'  => 'bancos',
                     'icon' => 'fas fa-university',
                     'classes' => 'ml-3',
                 ],
                 [
                     'text' => 'Cuentas Bancarias',
-                    'url'  => '#',
+                    'url'  => 'cuentas_bancarias',
                     'icon' => 'fas fa-credit-card',
                     'classes' => 'ml-3',
                 ],
