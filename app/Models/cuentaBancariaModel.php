@@ -22,4 +22,9 @@ class cuentaBancariaModel extends Model
     {
         return $this->hasMany(PagoEnc::class, 'ID_CUENTA_BANCARIA', 'id');
     }
+
+    public function movimientoBancario()
+    {
+        return $this->hasMany(Movimiento_Bancario::class, 'ID_CUENTA_BANCARIA', 'id');
+    }
 }

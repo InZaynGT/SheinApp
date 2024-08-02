@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class UpdateCuentaBancariaSaldo extends Migration
+class UpdateSaldoActualCuentaBancaria extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class UpdateCuentaBancariaSaldo extends Migration
      */
     public function up()
     {
-        Schema::table('cuenta_bancaria', function (Blueprint $table) {
-            $table->float('saldo_inicial')->NULLABLE();
-            $table->float('saldoActual')->nullable();
+        Schema::table('banco_deposito', function (Blueprint $table) {
+            $table->float('saldoActual');
         }); 
     }
 

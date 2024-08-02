@@ -384,6 +384,30 @@ return [
             ],
         ],
         [
+            'text' => 'Bancos',
+            'icon' => 'fas fa-building',
+            'submenu' => [
+                [
+                    'text' => 'Bancos',
+                    'url'  => '#',
+                    'icon' => 'fas fa-university',
+                    'classes' => 'ml-3',
+                ],
+                [
+                    'text' => 'Cuentas Bancarias',
+                    'url'  => '#',
+                    'icon' => 'fas fa-credit-card',
+                    'classes' => 'ml-3',
+                ],
+                [
+                    'text' => 'Movimientos Bancarios',
+                    'url'  => 'listado_movimientos',
+                    'icon' => 'fas fa-exchange-alt',
+                    'classes' => 'ml-3',
+                ],
+            ],
+        ],
+        [
             'text' => 'Configuración General',
             'icon' => 'fas fa-fw fa-user-cog',
             'submenu' => [
