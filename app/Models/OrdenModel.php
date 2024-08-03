@@ -26,4 +26,9 @@ class OrdenModel extends Model
     {
         return $this->hasMany(OrdenDetalleModel::class, 'idOrden');
     }
+
+    public function detalleAnticipo()
+    {
+        return $this->hasMany(AnticipoDETModel::class, 'idOrden', 'id');
+    }
 }

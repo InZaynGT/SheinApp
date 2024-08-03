@@ -15,4 +15,8 @@ class AnticipoModel extends Model
     {
         return $this->belongsTo(clienteModel::class, 'idCliente','id');
     }
+    
+    public function formaPago(){
+        return $this->belongsTo(FormaPago::class, 'formaPago','id');
+    }
 }

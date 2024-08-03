@@ -15,4 +15,9 @@ class AnticipoDETModel extends Model
     {
         return $this->belongsTo(AnticipoModel::class, 'idAnticipo','id');
     }
+
+    public function orden()
+    {
+        return $this->belongsTo(OrdenModel::class, 'idOrden', 'id');
+    }
 }

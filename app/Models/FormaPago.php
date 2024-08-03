@@ -15,4 +15,8 @@ class FormaPago extends Model
     {
         return $this->hasMany(PagoEnc::class, 'idPago','id');
     }
+    
+    public function Anticipo(){
+        return $this->hasMany(AnticipoModel::class, 'formaPago','id');
+    }
 }
