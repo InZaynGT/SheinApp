@@ -9,6 +9,7 @@ use App\Http\Controllers\Consulta_PagosController;
 use App\Http\Controllers\ListadoDeudoresController;
 use App\Http\Controllers\ListadoMovimientosController;
 use App\Http\Controllers\ListadoBancosController;
+use App\Http\Controllers\ListadoCuentasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,4 +46,5 @@ Route::get('/impresion_orden/{id}', [ListadoOrdenController::class, 'generateRep
 Route::get('/impresion_pago/{id}', [Consulta_PagosController::class, 'generateReport'])->name('pago_impresion');
 Route::get('/listado_movimientos', [ListadoMovimientosController::class, 'index'])->name('movimientos.index');
 Route::get('/bancos', [ListadoBancosController::class, 'index'])->name('movimientos.bancos');
+Route::get('/cuentas_bancarias', [ListadoCuentasController::class, 'index'])->name('movimientos.cuentas');
 Route::post('/movimiento/store', [ListadoMovimientosController::class, 'store'])->name('movimiento.store');

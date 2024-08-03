@@ -11,7 +11,7 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClientModal">
-                Agregar Entidad Bancaria
+                Agregar Cuenta Bancaria
             </button>
         </div>
         <div class="col-md-6">
@@ -22,14 +22,22 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Nombre</th>
+                <th>Nombre Cuenta</th>
+                <th>Número Cuenta</th>
+                <th>Banco</th>
+                <th>Saldo inicial</th>
+                <th>Saldo actual</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($bancos as $order)
+            @foreach($cuentas as $order)
             <tr>
                 <td>{{ $order->id }}</td>
-                <td>{{ $order->nombre }}</td>
+                <td>{{ $order->nombre_cuenta }}</td>
+                <td>{{ $order->numero_cuenta }}</td>
+                <td>{{ $order->Bancos->nombre }}</td>
+                <td>{{ $order->saldo_inicial }}</td>
+                <td>{{ $order->saldoActual }}</td>
             </tr>
             @endforeach
         </tbody>
