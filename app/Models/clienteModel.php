@@ -23,4 +23,8 @@ class clienteModel extends Model
     public function documentos(){
         return $this->hasMany(CxcDocumentoModel::class, 'idCliente','id');
     }
+
+    public function anticipos(){
+        return $this->hasMany(AnticipoModel::class, 'idCliente','id');
+    }
 }
