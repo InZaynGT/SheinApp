@@ -44,19 +44,19 @@ class DeudoresController extends Controller
     public function getAnticipos($idCliente)
     {
         $totalAnticipos = DB::table('anticipoenc')
-                            ->where('idCliente', $idCliente)
-                            ->sum('anticipoRestante');
+            ->where('idCliente', $idCliente)
+            ->sum('anticipoRestante');
         // Retornar los datos en formato JSON
         return response()->json($totalAnticipos);
     }
 
-    public function getDetalleAnticipos($idCliente)
+    public static function obtenerAnticiposRestantes($idCliente)
     {
-        $totalAnticipos = AnticipoModel::where('idCliente', $idCliente)
-                            ->sum('anticipoRestante');
-        // Retornar los datos en formato JSON
-        return response()->json($totalAnticipos);
+        return AnticipoModel::where('idCliente', $idCliente)
+            ->where('anticipoRestante', '>', 0)
+            ->get();
     }
+
 
     public function store(Request $request)
     {
@@ -72,27 +72,27 @@ class DeudoresController extends Controller
         DB::beginTransaction();
 
         try {
-            if($formaPago == 5){
+            // Si el forma de pago es anticipo, verificar los anticipos disponibles
+            if ($formaPago == 5) {
                 $Deudores = new DeudoresController;
                 $response = $Deudores->getAnticipos($clienteId);
                 $totalAnticipos = json_decode($response->getContent(), true);
-                if($totalAnticipos <= $montoTotal){
-                    throw new \Exception("El anticipo por usar no puede ser mayor al anticipo disponible.");
-                    exit;
+                if ($totalAnticipos <= $montoTotal) {
+                    throw new \Exception("El anticipo actual es menor que el anticipo por usar.");
                 }
             }
-
-            // Crear registro en PAGO_ENC
-            $pagoEnc = PagoEnc::create([
-                'idCliente' => $clienteId,
-                'idPago' => $formaPago,
-                'fecha' => $fechaContabilizacion,
-                'referencia' => $referencia,
-                'monto' => $montoTotal,
-                'NRO_DOCTO_BANCARIO' => in_array($formaPago, [3, 4]) ? $numeroDocumento : null,
-                'ID_CUENTA_BANCARIA' => in_array($formaPago, [3, 4]) ? $cuentaBancaria : null
-            ]);
-
+            if ($formaPago != 5) {
+                // Crear registro en PAGO_ENC
+                $pagoEnc = PagoEnc::create([
+                    'idCliente' => $clienteId,
+                    'idPago' => $formaPago,
+                    'fecha' => $fechaContabilizacion,
+                    'referencia' => $referencia,
+                    'monto' => $montoTotal,
+                    'NRO_DOCTO_BANCARIO' => in_array($formaPago, [3, 4]) ? $numeroDocumento : null,
+                    'ID_CUENTA_BANCARIA' => in_array($formaPago, [3, 4]) ? $cuentaBancaria : null
+                ]);
+            }
             // Ordenar documentos seleccionados por fecha en orden ascendente
             usort($documentosSeleccionados, function ($a, $b) {
                 return strtotime($a['fechaDocto']) - strtotime($b['fechaDocto']);
@@ -101,36 +101,68 @@ class DeudoresController extends Controller
             // Guardar el monto total inicial para usarlo en la inserción del depósito
             $montoTotalInicial = $montoTotal;
 
-            // Procesar documentos seleccionados
-            foreach ($documentosSeleccionados as $documento) {
-                $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
-                $montoAplicado = min($documento['saldo'], $montoTotal);
+            //FORMA DE PAGO CON ANTICIPO
+            if ($formaPago == 5) {
+                // Procesar documentos seleccionados
+                foreach ($documentosSeleccionados as $documento) {
+                    $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
+                    $montoAplicado = min($documento['saldo'], $montoTotal);
 
-                if ($montoAplicado > 0) {
-                    $cxcDocumento->saldoDocto -= $montoAplicado;
-                    $cxcDocumento->nroPagos += 1;
-                    $cxcDocumento->totalAcumuladoPagos += $montoAplicado;
+                    if ($montoAplicado > 0) {
+                        $cxcDocumento->saldoDocto -= $montoAplicado;
+                        $cxcDocumento->nroPagos += 1;
+                        $cxcDocumento->totalAcumuladoPagos += $montoAplicado;
 
-                    if ($cxcDocumento->saldoDocto < 0) {
-                        throw new \Exception("El saldo del documento no puede ser negativo.");
+                        if ($cxcDocumento->saldoDocto < 0) {
+                            throw new \Exception("El saldo del documento no puede ser negativo.");
+                        }
+
+                        $cxcDocumento->save();
+                        $montoTotal -= $montoAplicado;
+                        if ($montoTotal <= 0) {
+                            break;
+                        }
                     }
+                }
+                $anticipos_lista = $this->obtenerAnticiposRestantes($clienteId);
+                // Ordenar documentos seleccionados por fecha en orden ascendente
+                usort($anticipos_lista, function ($a, $b) {
+                    return strtotime($a['fecha']) - strtotime($b['fecha']);
+                });
+                foreach ($anticipos_lista as $anticipo) {
+                    
+                }
+            } else {
+                // Procesar documentos seleccionados
+                foreach ($documentosSeleccionados as $documento) {
+                    $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
+                    $montoAplicado = min($documento['saldo'], $montoTotal);
 
-                    $cxcDocumento->save();
+                    if ($montoAplicado > 0) {
+                        $cxcDocumento->saldoDocto -= $montoAplicado;
+                        $cxcDocumento->nroPagos += 1;
+                        $cxcDocumento->totalAcumuladoPagos += $montoAplicado;
 
-                    PagoDetModel::create([
-                        'ID_CXC_PAGO' => $pagoEnc->id,
-                        'ID_CXC' => $cxcDocumento->id,
-                        'monto_aplicado' => $montoAplicado
-                    ]);
+                        if ($cxcDocumento->saldoDocto < 0) {
+                            throw new \Exception("El saldo del documento no puede ser negativo.");
+                        }
 
-                    $montoTotal -= $montoAplicado;
+                        $cxcDocumento->save();
 
-                    if ($montoTotal <= 0) {
-                        break;
+                        PagoDetModel::create([
+                            'ID_CXC_PAGO' => $pagoEnc->id,
+                            'ID_CXC' => $cxcDocumento->id,
+                            'monto_aplicado' => $montoAplicado
+                        ]);
+
+                        $montoTotal -= $montoAplicado;
+
+                        if ($montoTotal <= 0) {
+                            break;
+                        }
                     }
                 }
             }
-
             // Verificar si el monto total no se ha agotado completamente
             if ($montoTotal > 0) {
                 throw new \Exception("El monto total a aplicar excede el monto disponible.");
@@ -139,14 +171,14 @@ class DeudoresController extends Controller
             // Insertar en banco_deposito si hay referencia y cuenta bancaria seleccionada
             if (in_array($formaPago, [3, 4])) {
                 $cuentaBancariaModel = CuentaBancariaModel::findOrFail($cuentaBancaria);
-                $nuevoSaldo = $cuentaBancariaModel->saldoActual + $montoTotalInicial;  // Usar el monto total inicial aquí
+                $nuevoSaldo = $cuentaBancariaModel->saldoActual + $montoTotalInicial;
 
                 // Insertar el depósito
                 DB::table('banco_deposito')->insert([
                     'ID_CUENTA_BANCARIA' => $cuentaBancaria,
                     'fecha' => $fechaContabilizacion,
                     'nro_referencia' => $numeroDocumento,
-                    'debe' => $montoTotalInicial,  // Usar el monto total inicial aquí
+                    'debe' => $montoTotalInicial,
                     'haber' => 0,
                     'notas' => $referencia,
                     'estado' => 1,
@@ -160,18 +192,16 @@ class DeudoresController extends Controller
 
             DB::commit();
 
-            //Devolvemos el ID del pago creado
             return response()->json(['success' => true, 'orden_id' => $pagoEnc->id]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        return response()->json(['success' => true], 200);
     }
 
+
     public function storeAnticipo(Request $request)
-    {   
+    {
         //se inserta aplicado = 0 debido a que es un nuevo anticipo que no se ha usado para nada.
         $idCliente = $request->input('cliente_id');
         $formaPago = $request->input('forma_pago');
@@ -183,6 +213,19 @@ class DeudoresController extends Controller
         $anticipo_aplicado = 0;
         $anticipoRestante = $monto;
 
+        // Crear registro en PAGO_ENC
+        $formaPagoAnticipo = 5;
+        $pagoEnc = PagoEnc::create([
+            'idCliente' => $idCliente,
+            'idPago' => $formaPagoAnticipo,
+            'fecha' => $fechaContabilizacion,
+            'referencia' => $observaciones,
+            'monto' => $monto,
+            'NRO_DOCTO_BANCARIO' => in_array($formaPago, [3, 4]) ? $numeroDocumento : null,
+            'ID_CUENTA_BANCARIA' => in_array($formaPago, [3, 4]) ? $cuentaBancaria : null
+        ]);
+
+        //Crear Registro en anticipoenc
         $anticipo = new AnticipoModel();
         $anticipo->idCliente = $idCliente;
         $anticipo->formaPago = $formaPago;
@@ -191,8 +234,9 @@ class DeudoresController extends Controller
         $anticipo->observaciones = $observaciones;
         $anticipo->aplicado = $anticipo_aplicado;
         $anticipo->anticipoRestante = $anticipoRestante;
+        $anticipo->idPagoEnc = $pagoEnc->id;
         $anticipo->save();
-        
+
         $montoTotalInicial = $monto;
 
         if (in_array($request->input('forma_pago'), [3, 4])) {
