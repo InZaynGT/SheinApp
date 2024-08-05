@@ -89,6 +89,7 @@
                                                 <option value="{{ $pago->id }}">{{ $pago->nombre }}</option>
                                             @endforeach
                                         </select>
+                                        <label id="anticipo_label" style="display:none">5</label>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -104,14 +105,14 @@
                                         <input type="text" id="referencia" name="referencia" class="form-control">
                                     </div>
                                 </div>
-                                <div class="col-md-6" id="div_documento">
+                                <div class="col-md-6" id="div_documento" style="display:none">
                                     <div class="form-group">
                                         <label for="numero_documento">Número de documento:</label>
                                         <input type="text" id="numero_documento" name="numero_documento"
                                             class="form-control" style="display:none;">
                                     </div>
                                 </div>
-                                <div class="col-md-6" id="div_cuenta_bancaria">
+                                <div class="col-md-6" id="div_cuenta_bancaria" style="display:none">
                                     <div class="form-group">
                                         <label for="cuenta_bancaria">Cuenta Bancaria:</label>
                                         <select id="cuenta_bancaria" name="cuenta_bancaria" class="form-control"
@@ -255,15 +256,19 @@
                 document.getElementById('monto_seleccionado').value = '';
 
                 if (clienteId) {
-                    fetch(`/deudores/documentos/${clienteId}`)
+                    fetch('/deudores/anticipos/' + clienteId)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        document.getElementById('anticipo_label').innerHTML = "Disponible: Q." + data.toFixed(2);
+                    })
+                    fetch('/deudores/documentos/' + clienteId)
                         .then(response => response.json())
                         .then(data => {
-                            console.log('Documentos:', data); // Verificar los datos completos
                             saldoTotal = data.reduce((acc, doc) => acc + parseFloat(doc.saldoDocto), 0);
                             document.getElementById('saldo_total').value = saldoTotal.toFixed(2);
 
                             data.forEach(documento => {
-                                console.log('Documento:', documento); // Verificar los datos
                                 var row = document.createElement('tr');
                                 var montoDocto = parseFloat(documento.montoDocto).toFixed(2);
                                 var saldoDocto = parseFloat(documento.saldoDocto).toFixed(2);
@@ -351,9 +356,18 @@
                 var selectedValue = this.value;
                 document.getElementById('numero_documento').style.display = 'none';
                 document.getElementById('cuenta_bancaria').style.display = 'none';
+                document.getElementById('anticipo_label').style.display = 'none';
+                document.getElementById('div_cuenta_bancaria').style.display = 'none';
+                document.getElementById('div_documento').style.display = 'none';
+                document.getElementById('anticipo_label').style.display = 'none';
                 if (selectedValue == '3' || selectedValue == '4') {
                     document.getElementById('numero_documento').style.display = 'block';
                     document.getElementById('cuenta_bancaria').style.display = 'block';
+                    document.getElementById('div_documento').style.display = 'block';
+                    document.getElementById('div_cuenta_bancaria').style.display = 'block';
+                }
+                else if(selectedValue == '5'){
+                    document.getElementById('anticipo_label').style.display = 'block';
                 }
             });
 

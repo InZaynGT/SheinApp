@@ -38,6 +38,7 @@ Route::post('/ordenes/store', [CrearOrdenController::class, 'store'])->name('ord
 Route::get('/ordenes/{id}', [listadoOrdenController::class, 'show'])->name('ordenes.show');
 Route::get('/deudores', [DeudoresController::class, 'index'])->name('deudores.index');
 Route::get('/deudores/documentos/{idCliente}', [DeudoresController::class, 'getDocumentosDeudores'])->name('deudores.documentos');
+Route::get('/deudores/anticipos/{idCliente}', [DeudoresController::class,'getAnticipos'])->name('deudores.anticipos');
 Route::get('/deudores/pagos-aplicados/{idDocumento}', [DeudoresController::class, 'getPagosAplicados'])->name('deudores.pagos_aplicados');
 Route::post('/pagos/store', [DeudoresController::class, 'store'])->name('pagos.store');
 Route::get('/consulta_pagos', [Consulta_PagosController::class, 'index'])->name('deudores.consulta_pagos');

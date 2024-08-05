@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnticipoDETModel;
 use App\Models\AnticipoModel;
 use Illuminate\Http\Request;
 use App\Models\ClienteModel;
@@ -40,6 +41,23 @@ class DeudoresController extends Controller
         return response()->json($pagosAplicados);
     }
 
+    public function getAnticipos($idCliente)
+    {
+        $totalAnticipos = DB::table('anticipoenc')
+                            ->where('idCliente', $idCliente)
+                            ->sum('anticipoRestante');
+        // Retornar los datos en formato JSON
+        return response()->json($totalAnticipos);
+    }
+
+    public function getDetalleAnticipos($idCliente)
+    {
+        $totalAnticipos = AnticipoModel::where('idCliente', $idCliente)
+                            ->sum('anticipoRestante');
+        // Retornar los datos en formato JSON
+        return response()->json($totalAnticipos);
+    }
+
     public function store(Request $request)
     {
         $clienteId = $request->input('cliente_id');
@@ -54,6 +72,16 @@ class DeudoresController extends Controller
         DB::beginTransaction();
 
         try {
+            if($formaPago == 5){
+                $Deudores = new DeudoresController;
+                $response = $Deudores->getAnticipos($clienteId);
+                $totalAnticipos = json_decode($response->getContent(), true);
+                if($totalAnticipos <= $montoTotal){
+                    throw new \Exception("El anticipo por usar no puede ser mayor al anticipo disponible.");
+                    exit;
+                }
+            }
+
             // Crear registro en PAGO_ENC
             $pagoEnc = PagoEnc::create([
                 'idCliente' => $clienteId,
@@ -153,6 +181,7 @@ class DeudoresController extends Controller
         $observaciones = $request->input('observaciones');
         $monto = $request->input('monto');
         $anticipo_aplicado = 0;
+        $anticipoRestante = $monto;
 
         $anticipo = new AnticipoModel();
         $anticipo->idCliente = $idCliente;
@@ -161,6 +190,7 @@ class DeudoresController extends Controller
         $anticipo->monto = $monto;
         $anticipo->observaciones = $observaciones;
         $anticipo->aplicado = $anticipo_aplicado;
+        $anticipo->anticipoRestante = $anticipoRestante;
         $anticipo->save();
         
         $montoTotalInicial = $monto;
