@@ -9,7 +9,7 @@ class AnticipoModel extends Model
 {
     use HasFactory;
     protected $table = 'anticipoenc'; // Asegúrate de que esta sea la tabla correcta
-    protected $fillable = ['idCliente','formaPago','fecha','monto','aplicado','observaciones', 'anticipoRestante'];
+    protected $fillable = ['idCliente','formaPago','fecha','monto','aplicado','observaciones', 'anticipoRestante', 'idPagoEnc'];
 
     public function Cliente()
     {
@@ -18,5 +18,10 @@ class AnticipoModel extends Model
     
     public function formaPago(){
         return $this->belongsTo(FormaPago::class, 'formaPago','id');
+    }
+
+    public function PagoENC()
+    {
+        return $this->belongsTo(PagoEnc::class, 'idPagoEnc', 'id');
     }
 }

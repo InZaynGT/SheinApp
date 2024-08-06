@@ -13,7 +13,7 @@ class PagoEnc extends Model
 {
     use HasFactory;
     protected $table = 'pago_enc';
-    protected $fillable = ['id', 'idCliente', 'idPago', 'fecha', 'referencia', 'monto','NRO_DOCTO_BANCARIO','ID_CUENTA_BANCARIA'];
+    protected $fillable = ['id', 'idCliente', 'idPago', 'fecha', 'referencia', 'monto','NRO_DOCTO_BANCARIO','ID_CUENTA_BANCARIA', 'idPagoEnc'];
     protected $primaryKey = 'id';
     
     public function formaPago()
@@ -34,5 +34,10 @@ class PagoEnc extends Model
     public function CuentasBancarias()
     {
         return $this->belongsTo(cuentaBancariaModel::class, 'ID_CUENTA_BANCARIA', 'id');
+    }
+
+    public function Anticipo()
+    {
+        return $this->belongsTo(AnticipoModel::class, 'idPagoEnc', 'id');
     }
 }

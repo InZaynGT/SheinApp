@@ -9,7 +9,7 @@ class AnticipoDETModel extends Model
 {
     use HasFactory;
     protected $table = 'anticipodet'; // Asegúrate de que esta sea la tabla correcta
-    protected $fillable = ['idCliente','formaPago','fecha','monto','aplicado','observaciones'];
+    protected $fillable = ['idAnticipo','idOrden','montoAplicado'];
 
     public function AnticipoENC()
     {

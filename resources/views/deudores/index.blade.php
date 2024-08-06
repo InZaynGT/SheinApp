@@ -407,6 +407,7 @@
                         if (result.success) {
                             alert('Anticipo registrado exitosamente');
                             $('#modalAnticipo').modal('hide');
+                            window.open('/impresion_pago/' + result.orden_id, '_blank');
                             location.reload();
                         } else {
                             alert('Error: ' + result.message);
