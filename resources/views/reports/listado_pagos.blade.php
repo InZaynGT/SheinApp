@@ -124,7 +124,7 @@
                         @foreach($pago->PagosDet as $pagoDet)
                             @if($pagoDet->orden)
                             <tr>
-                                <td>{{ $pagoDet->orden->id }}</td>
+                                <td>{{ $pagoDet->cxcDocumento->Nro_docto }}</td>
                                 <td>Q.{{ number_format($pagoDet->monto_aplicado,2) }}</td>
                                 <td>{{ \Carbon\Carbon::parse($pagoDet->orden->fechaPromesa)->format('d F Y') }}</td>
                             </tr>

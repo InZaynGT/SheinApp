@@ -107,52 +107,94 @@ class DeudoresController extends Controller
                 $saldoDocumento = $documento['saldo'];
 
                 while ($saldoDocumento > 0 && $montoTotal > 0) {
-                    foreach ($anticipos_lista as $anticipo) {
-                        if ($montoTotal <= 0) {
-                            break;
+                    // Verifica si la forma de pago es 5 (anticipos)
+                    if ($formaPago == 5) {
+                        foreach ($anticipos_lista as $anticipo) {
+                            if ($montoTotal <= 0) {
+                                break;
+                            }
+
+                            $montoAplicadoAnticipo = min($anticipo['anticipoRestante'], $montoTotal);
+                            $montoAplicadoDocumento = min($saldoDocumento, $montoAplicadoAnticipo);
+
+                            if ($montoAplicadoDocumento > 0) {
+                                $anticipoModel = AnticipoModel::findOrFail($anticipo['id']);
+                                $anticipoModel->anticipoRestante -= $montoAplicadoDocumento;
+
+                                if ($anticipoModel->anticipoRestante < 0) {
+                                    throw new \Exception("El saldo del anticipo no puede ser negativo.");
+                                }
+
+                                $anticipoModel->save();
+
+                                $cxcDocumento->saldoDocto -= $montoAplicadoDocumento;
+                                $cxcDocumento->nroPagos += 1;
+                                $cxcDocumento->totalAcumuladoPagos += $montoAplicadoDocumento;
+
+                                if ($cxcDocumento->saldoDocto < 0) {
+                                    throw new \Exception("El saldo del documento no puede ser negativo.");
+                                }
+
+                                $cxcDocumento->save();
+
+                                PagoDetModel::create([
+                                    'ID_CXC_PAGO' => $anticipoModel->pagoENC->id,
+                                    'ID_CXC' => $cxcDocumento->id,
+                                    'monto_aplicado' => $montoAplicadoDocumento,
+                                ]);
+
+                                AnticipoDetModel::create([
+                                    'idAnticipo' => $anticipoModel->id,
+                                    'idOrden' => $cxcDocumento->id,
+                                    'montoAplicado' => $montoAplicadoDocumento
+                                ]);
+
+                                $montoTotal -= $montoAplicadoDocumento;
+                                $saldoDocumento -= $montoAplicadoDocumento;
+                            }
                         }
+                    } else {
+                        // Ordenar documentos seleccionados por fecha en orden ascendente
+                        usort($documentosSeleccionados, function ($a, $b) {
+                            return strtotime($a['fechaDocto']) - strtotime($b['fechaDocto']);
+                        });
 
-                        $montoAplicadoAnticipo = min($anticipo['anticipoRestante'], $montoTotal);
-                        $montoAplicadoDocumento = min($saldoDocumento, $montoAplicadoAnticipo);
+                        // Guardar el monto total inicial para usarlo en la inserción del depósito
+                        $montoTotalInicial = $montoTotal;
 
-                        if ($montoAplicadoDocumento > 0) {
-                            $anticipoModel = AnticipoModel::findOrFail($anticipo['id']);
-                            $anticipoModel->anticipoRestante -= $montoAplicadoDocumento;
+                        // Procesar documentos seleccionados
+                        foreach ($documentosSeleccionados as $documento) {
+                            $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
+                            $montoAplicado = min($documento['saldo'], $montoTotal);
 
-                            if ($anticipoModel->anticipoRestante < 0) {
-                                throw new \Exception("El saldo del anticipo no puede ser negativo.");
+                            if ($montoAplicado > 0) {
+                                $cxcDocumento->saldoDocto -= $montoAplicado;
+                                $cxcDocumento->nroPagos += 1;
+                                $cxcDocumento->totalAcumuladoPagos += $montoAplicado;
+
+                                if ($cxcDocumento->saldoDocto < 0) {
+                                    throw new \Exception("El saldo del documento no puede ser negativo.");
+                                }
+
+                                $cxcDocumento->save();
+
+                                PagoDetModel::create([
+                                    'ID_CXC_PAGO' => $pagoEnc->id,
+                                    'ID_CXC' => $cxcDocumento->id,
+                                    'monto_aplicado' => $montoAplicado
+                                ]);
+
+                                $montoTotal -= $montoAplicado;
+
+                                if ($montoTotal <= 0) {
+                                    break;
+                                }
                             }
-
-                            $anticipoModel->save();
-
-                            $cxcDocumento->saldoDocto -= $montoAplicadoDocumento;
-                            $cxcDocumento->nroPagos += 1;
-                            $cxcDocumento->totalAcumuladoPagos += $montoAplicadoDocumento;
-
-                            if ($cxcDocumento->saldoDocto < 0) {
-                                throw new \Exception("El saldo del documento no puede ser negativo.");
-                            }
-
-                            $cxcDocumento->save();
-
-                            PagoDetModel::create([
-                                'ID_CXC_PAGO' => $anticipoModel->pagoENC->id,
-                                'ID_CXC' => $cxcDocumento->id,
-                                'monto_aplicado' => $montoAplicadoDocumento,
-                            ]);
-
-                            AnticipoDetModel::create([
-                                'idAnticipo' => $anticipoModel->id,
-                                'idOrden' => $cxcDocumento->id,
-                                'montoAplicado' => $montoAplicadoDocumento
-                            ]);
-
-                            $montoTotal -= $montoAplicadoDocumento;
-                            $saldoDocumento -= $montoAplicadoDocumento;
                         }
                     }
                 }
             }
+
             $montoTotalInicial = $montoTotal;
 
             if ($montoTotal > 0) {
@@ -179,12 +221,11 @@ class DeudoresController extends Controller
             }
 
             DB::commit();
-            if($formaPago!=5){
+            if ($formaPago != 5) {
                 return response()->json(['success' => true, 'orden_id' => $pagoEnc->id]);
-            }else{
+            } else {
                 return response()->json(['success' => true, 'message' => 'Anticipo registrado exitosamente']);
             }
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 400);
