@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AnticipoDETModel;
 use App\Models\AnticipoModel;
 use Illuminate\Http\Request;
-use App\Models\ClienteModel;
+use App\Models\clienteModel;
 use App\Models\CxcDocumentoModel;
 use App\Models\PagoDetModel;
 use App\Models\FormaPago;
