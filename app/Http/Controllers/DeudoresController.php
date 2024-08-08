@@ -18,7 +18,7 @@ class DeudoresController extends Controller
     //DE PREFERENCIA CARGAR LO QUE NECESITAMOS DE UNA VEZ CON EL INDEX (CLIENTE PENDIENTE DE MODIFICAR)
     public function index()
     {
-        $clientes = ClienteModel::all();
+        $clientes = clienteModel::all();
         $formasPago = FormaPago::all();
         $cuentasBancarias = cuentaBancariaModel::all();
         return view('deudores.index', compact('clientes', 'formasPago', 'cuentasBancarias'));
