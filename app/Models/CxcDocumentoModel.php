@@ -20,6 +20,6 @@ class CxcDocumentoModel extends Model
     }
     public function cliente()
     {
-        return $this->belongsTo(ClienteModel::class, 'idCliente','id');
+        return $this->belongsTo(clienteModel::class, 'idCliente','id');
     }
 }

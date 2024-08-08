@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClienteModel;
+use App\Models\clienteModel;
 use Illuminate\Http\Request;
 use App\Models\OrdenModel;
 use App\Models\OrdenDetalleModel;
@@ -13,7 +13,7 @@ class crearOrdenController extends Controller
 {
     public function index()
     {
-        $clientes = ClienteModel::all();
+        $clientes = clienteModel::all();
         return view('ordenes.crearOrden', compact('clientes'));
     }
 

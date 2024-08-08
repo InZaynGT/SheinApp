@@ -19,7 +19,7 @@ class listadoClienteController extends Controller
 
     public function update(Request $request)
     {
-        $cliente = ClienteModel::findOrFail($request->input('id'));
+        $cliente = clienteModel::findOrFail($request->input('id'));
         $cliente->nombre = $request->input('nombre');
         $cliente->direccion = $request->input('direccion');
         $cliente->telefono = $request->input('telefono');
