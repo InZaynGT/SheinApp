@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CrearOrdenController;
+use App\Http\Controllers\crearOrdenController;
 use App\Http\Controllers\listadoOrdenController;
 use App\Http\Controllers\listadoClienteController;
 use App\Http\Controllers\DeudoresController;
@@ -29,12 +29,12 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/crearorden', [CrearOrdenController::class, 'index'])->name('ordenes.crearorden');
+Route::get('/crearorden', [crearOrdenController::class, 'index'])->name('ordenes.crearorden');
 Route::get('/listadoOrden', [listadoOrdenController::class, 'index'])->name('ordenes.index');
 Route::get('/clientes', [listadoClienteController::class, 'index'])->name('clientes.index');
 Route::put('/cliente/update', [listadoClienteController::class, 'update'])->name('cliente.update');
 Route::post('/clientes/store', [listadoClienteController::class, 'store'])->name('cliente.store');
-Route::post('/ordenes/store', [CrearOrdenController::class, 'store'])->name('ordenes.store');
+Route::post('/ordenes/store', [crearOrdenController::class, 'store'])->name('ordenes.store');
 Route::get('/ordenes/{id}', [listadoOrdenController::class, 'show'])->name('ordenes.show');
 Route::get('/deudores', [DeudoresController::class, 'index'])->name('deudores.index');
 Route::get('/deudores/documentos/{idCliente}', [DeudoresController::class, 'getDocumentosDeudores'])->name('deudores.documentos');
