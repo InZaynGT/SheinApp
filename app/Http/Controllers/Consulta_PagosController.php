@@ -13,7 +13,7 @@ class Consulta_PagosController extends Controller
     {
         //Mandamos a traer la info de la BDD y la almacenamos en $ordenes
         $listado_pagos = PagoEnc::with(['Clientes', 'formaPago', 'CuentasBancarias.Bancos', 'PagosDet.orden'])
-        ->where('estado','=','1')
+        ->where('pago_enc.estado','=','1')
         ->orderBy('id', 'desc')->paginate(50)
         ->get();
         //Retornamos la vista (pasamos la ruta) y pasamos el parámetro de la variable de ordenes
