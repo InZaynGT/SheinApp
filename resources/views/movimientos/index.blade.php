@@ -137,7 +137,7 @@
 
                     <div class="mb-3">
                         <label for="movementMonto" class="form-label">Monto</label>
-                        <input type="text" class="form-control" id="movementMonto" name="monto" required>
+                        <input type="number" class="form-control" id="movementMonto" name="monto" required>
                     </div>
 
                     <div class="mb-3">
