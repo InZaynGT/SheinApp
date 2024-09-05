@@ -13,7 +13,6 @@ class listadoOrdenController extends Controller
     {
         //Mandamos a traer la info de la BDD y la almacenamos en $ordenes
         $ordenes = OrdenModel::with('cliente', 'CXC')
-        ->where('estado','=','1')
         ->orderBy('id', 'desc')->paginate(50);        
         //Retornamos la vista (pasamos la ruta) y pasamos el parámetro de la variable de ordenes
         return view('ordenes.index', compact('ordenes'));

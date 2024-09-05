@@ -13,7 +13,7 @@ class PagoEnc extends Model
 {
     use HasFactory;
     protected $table = 'pago_enc';
-    protected $fillable = ['id', 'idCliente', 'idPago', 'fecha', 'referencia', 'monto','NRO_DOCTO_BANCARIO','ID_CUENTA_BANCARIA', 'idPagoEnc'];
+    protected $fillable = ['id', 'idCliente', 'idPago', 'fecha', 'referencia', 'monto','NRO_DOCTO_BANCARIO','ID_CUENTA_BANCARIA', 'idPagoEnc', 'estado'];
     protected $primaryKey = 'id';
     
     public function formaPago()

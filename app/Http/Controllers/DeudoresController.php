@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\clienteModel;
 use App\Models\CxcDocumentoModel;
 use App\Models\PagoDetModel;
+use App\Models\OrdenModel;
 use App\Models\FormaPago;
 use App\Models\cuentaBancariaModel;
 use App\Models\PagoEnc;
@@ -88,8 +89,28 @@ class DeudoresController extends Controller
                     'referencia' => $referencia,
                     'monto' => $montoTotal,
                     'NRO_DOCTO_BANCARIO' => in_array($formaPago, [3, 4]) ? $numeroDocumento : null,
-                    'ID_CUENTA_BANCARIA' => in_array($formaPago, [3, 4]) ? $cuentaBancaria : null
+                    'ID_CUENTA_BANCARIA' => in_array($formaPago, [3, 4]) ? $cuentaBancaria : null,
+                    'estado' => 1
                 ]);
+
+                if (in_array($formaPago, [3, 4])) {
+                    $cuentaBancariaModel = CuentaBancariaModel::findOrFail($cuentaBancaria);
+                    $nuevoSaldo = $cuentaBancariaModel->saldoActual + $montoTotal;
+
+                    DB::table('banco_deposito')->insert([
+                        'ID_CUENTA_BANCARIA' => $cuentaBancaria,
+                        'fecha' => $fechaContabilizacion,
+                        'nro_referencia' => $numeroDocumento,
+                        'debe' => $montoTotal,
+                        'haber' => 0,
+                        'notas' => $referencia,
+                        'estado' => 1,
+                        'saldoActual' => $nuevoSaldo,
+                    ]);
+
+                    $cuentaBancariaModel->saldoActual = $nuevoSaldo;
+                    $cuentaBancariaModel->save();
+                }
             }
 
             usort($documentosSeleccionados, function ($a, $b) {
@@ -105,6 +126,7 @@ class DeudoresController extends Controller
             foreach ($documentosSeleccionados as $documento) {
                 $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
                 $saldoDocumento = $documento['saldo'];
+                $ordenEnc = OrdenModel::where('id', $cxcDocumento->Nro_docto)->firstOrFail();
 
                 while ($saldoDocumento > 0 && $montoTotal > 0) {
                     // Verifica si la forma de pago es 5 (anticipos)
@@ -166,6 +188,8 @@ class DeudoresController extends Controller
                         foreach ($documentosSeleccionados as $documento) {
                             $cxcDocumento = CxcDocumentoModel::findOrFail($documento['id']);
                             $montoAplicado = min($documento['saldo'], $montoTotal);
+                            $ordenEnc = OrdenModel::where('id', $cxcDocumento->Nro_docto)->firstOrFail();
+
 
                             if ($montoAplicado > 0) {
                                 $cxcDocumento->saldoDocto -= $montoAplicado;
@@ -195,30 +219,8 @@ class DeudoresController extends Controller
                 }
             }
 
-            $montoTotalInicial = $montoTotal;
+            //$montoTotalInicial = $montoTotal;
 
-            if ($montoTotal > 0) {
-                throw new \Exception("El monto total a aplicar excede el monto disponible.");
-            }
-
-            if (in_array($formaPago, [3, 4])) {
-                $cuentaBancariaModel = CuentaBancariaModel::findOrFail($cuentaBancaria);
-                $nuevoSaldo = $cuentaBancariaModel->saldoActual + $montoTotalInicial;
-
-                DB::table('banco_deposito')->insert([
-                    'ID_CUENTA_BANCARIA' => $cuentaBancaria,
-                    'fecha' => $fechaContabilizacion,
-                    'nro_referencia' => $numeroDocumento,
-                    'debe' => $montoTotalInicial,
-                    'haber' => 0,
-                    'notas' => $referencia,
-                    'estado' => 1,
-                    'saldoActual' => $nuevoSaldo,
-                ]);
-
-                $cuentaBancariaModel->saldoActual = $nuevoSaldo;
-                $cuentaBancariaModel->save();
-            }
 
             DB::commit();
             if ($formaPago != 5) {

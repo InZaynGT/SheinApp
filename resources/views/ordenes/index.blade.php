@@ -12,30 +12,53 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Número de Orden</th>
+                <th>ID</th>
+                <th>Fecha de Orden</th>
                 <th>Nombre del Cliente</th>
                 <th>Monto de la Orden</th>
                 <th>Saldo Pendiente</th>
-                <th>Promesa de Entrega</th>
+                <th>Estado</th>
                 <th>Acciones</th>
             </tr>
             <tr>
-                <th><input type="text" id="search-numero-orden" class="form-control" placeholder="Buscar..."></th>
-                <th><input type="text" id="search-nombre-cliente" class="form-control" placeholder="Buscar..."></th>
-                <th><input type="text" id="search-monto-orden" class="form-control" placeholder="Buscar..."></th>
-                <th><input type="text" id="search-saldo-pendiente" class="form-control" placeholder="Buscar..."></th>
-                <th><input type="text" id="search-promesa-entrega" class="form-control" placeholder="Buscar..."></th>
+                <th><input type="text" id="search-numero-orden" class="form-control" placeholder="ID"></th>
+                <th><input type="text" id="search-promesa-entrega" class="form-control" placeholder="Fecha"></th>
+                <th><input type="text" id="search-nombre-cliente" class="form-control" placeholder="Nombre Cliente"></th>
+                <th><input type="text" id="search-monto-orden" class="form-control" placeholder="Monto de la Orden"></th>
+                <th><input type="text" id="search-saldo-pendiente" class="form-control" placeholder="Saldo de la Orden"></th>
                 <th></th>
             </tr>
         </thead>
         <tbody id="ordenes-table">
             @foreach($ordenes as $order)
             <tr>
-                <td>{{ $order->id }}</td>
+                <td style="width: 100px; padding: 10px;">{{ $order->id }}</td>
+                <td>{{ \Carbon\Carbon::parse($order->fechaPromesa)->format('d F Y') }}</td>
                 <td>{{ $order->cliente->nombre }}</td>
                 <td>Q. {{ number_format($order->CXC->montoDocto,2) }}</td>
                 <td>Q. {{ number_format($order->CXC->saldoDocto,2) }}</td>
-                <td>{{ \Carbon\Carbon::parse($order->fechaPromesa)->format('d F Y') }}</td>
+                <td>
+                    @switch($order->estado)
+                        @case(0)
+                            <span class="badge badge-warning">Solicitado</span>
+                            @break
+                        @case(1)
+                            <span class="badge badge-danger">Cancelado</span>
+                            @break
+                        @case(2)
+                            <span class="badge badge-success">Confirmado</span>
+                            @break
+                        @case(3)
+                            <span class="badge badge-primary">En Bodega</span>
+                            @break
+                        @case(4)
+                            <span class="badge badge-orange" style="background-color: orange;">Parcialmente pagado</span>
+                            @break
+                        @case(5)
+                            <i class="fas fa-check text-success"></i>
+                            @break
+                    @endswitch
+                </td>
                 <td>
                     <a href="{{ route('ordenes.show', $order->id) }}" class="btn btn-info" target="_blank"><i class="fas fa-list"></i></a>
                     <a href="{{ route('voting-result', $order->id) }}" class="btn btn-warning" target="_blank"><i class="fas fa-print"></i></a>
