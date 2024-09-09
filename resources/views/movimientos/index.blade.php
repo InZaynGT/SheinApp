@@ -137,8 +137,9 @@
 
                     <div class="mb-3">
                         <label for="movementMonto" class="form-label">Monto</label>
-                        <input type="number" class="form-control" id="movementMonto" name="monto" required>
+                        <input type="number" class="form-control" id="movementMonto" name="monto" step="0.01" min="0" required>
                     </div>
+                    
 
                     <div class="mb-3">
                         <label for="movementNotas" class="form-label">Notas</label>
