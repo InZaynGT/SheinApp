@@ -43,8 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pagos/store', [DeudoresController::class, 'store'])->name('pagos.store');
     Route::get('/consulta_pagos', [Consulta_PagosController::class, 'index'])->name('deudores.consulta_pagos');
     Route::get('/listado_deudores', [ListadoDeudoresController::class, 'index'])->name('deudores.listado_deudores');
-    Route::get('/impresion_orden/{id}', [ListadoOrdenController::class, 'generateReport'])->name('voting-result');
-    Route::get('/impresion_pago/{id}', [Consulta_PagosController::class, 'generateReport'])->name('pago_impresion');
+
     Route::get('/listado_movimientos', [ListadoMovimientosController::class, 'index'])->name('movimientos.index');
     Route::get('/bancos', [ListadoBancosController::class, 'index'])->name('movimientos.bancos');
     Route::get('/cuentas_bancarias', [ListadoCuentasController::class, 'index'])->name('movimientos.cuentas');
@@ -52,3 +51,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/anticipos', [DeudoresController::class, 'storeAnticipo'])->name('anticipos.store');
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
+
+Route::get('/impresion_orden/{id}', [ListadoOrdenController::class, 'generateReport'])->name('voting-result');
+Route::get('/impresion_pago/{id}', [Consulta_PagosController::class, 'generateReport'])->name('pago_impresion');
