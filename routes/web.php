@@ -50,4 +50,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cuentas_bancarias', [ListadoCuentasController::class, 'index'])->name('movimientos.cuentas');
     Route::post('/movimiento/store', [ListadoMovimientosController::class, 'store'])->name('movimiento.store');
     Route::post('/anticipos', [DeudoresController::class, 'storeAnticipo'])->name('anticipos.store');
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
