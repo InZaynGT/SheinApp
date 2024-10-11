@@ -25,6 +25,15 @@ class DeudoresController extends Controller
         return view('deudores.index', compact('clientes', 'formasPago', 'cuentasBancarias'));
     }
 
+    // En tu controlador
+    public function buscarCliente(Request $request)
+    {
+        $term = $request->get('term');
+        $clientes = clienteModel::where('nombre', 'LIKE', '%' . $term . '%')->get(); // Aquí buscas coincidencias
+        return response()->json($clientes);
+    }
+
+
     public function getDocumentosDeudores($idCliente)
     {
         $documentos = CxcDocumentoModel::where('idCliente', $idCliente)

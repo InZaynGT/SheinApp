@@ -13,15 +13,12 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="cliente">Buscar Cliente:</label>
-                    <select class="form-control" id="cliente">
-                        <option value=" ">Seleccione un cliente</option>
-                        @foreach ($clientes as $cliente)
-                            <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" class="form-control" id="cliente"
+                        placeholder="Empieza a escribir el nombre del cliente...">
                 </div>
             </div>
         </div>
+
 
         <!-- Documentos Section -->
         <div class="row">
@@ -131,27 +128,45 @@
                                     <div class="form-group row">
                                         <label for="saldo_total" class="col-md-4 col-form-label text-left">Saldo
                                             total:</label>
-                                        <div class="col-md-8">
-                                            <input type="text" id="saldo_total" name="saldo_total"
-                                                class="form-control text-right" disabled>
+                                        <div class="col-md-5">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Q.</span> <!-- Anteponer "Q." -->
+                                                </div>
+                                                <input type="text" id="saldo_total" name="saldo_total"
+                                                    class="form-control text-right" disabled>
+                                            </div>
                                         </div>
                                     </div>
+
                                     <div class="form-group row">
                                         <label for="monto_seleccionado" class="col-md-4 col-form-label text-left">Monto
                                             seleccionado:</label>
-                                        <div class="col-md-8">
-                                            <input type="text" id="monto_seleccionado" name="monto_seleccionado"
-                                                class="form-control text-right" disabled>
+                                        <div class="col-md-5">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Q.</span> <!-- Anteponer "Q." -->
+                                                </div>
+                                                <input type="text" id="monto_seleccionado" name="monto_seleccionado"
+                                                    class="form-control text-right" disabled>
+                                            </div>
                                         </div>
                                     </div>
+
                                     <div class="form-group row">
                                         <label for="monto_a_operar" class="col-md-4 col-form-label text-left">Monto a
                                             operar:</label>
-                                        <div class="col-md-8">
-                                            <input type="text" id="monto_a_operar" name="monto_a_operar"
-                                                class="form-control text-right">
+                                        <div class="col-md-5">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Q.</span>
+                                                </div>
+                                                <input type="number" step="0.01" id="monto_a_operar"
+                                                    name="monto_a_operar" class="form-control text-right" min="0">
+                                            </div>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Registrar Pago</button>
@@ -164,6 +179,7 @@
 
     <!-- Modal para Ingresar Anticipo -->
     <div class="modal fade" id="modalAnticipo" tabindex="-1" role="dialog" aria-labelledby="modalAnticipoLabel"
+        aria-hidden="true" data-backdrop="static">
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -176,13 +192,13 @@
                 <div class="modal-body">
                     <form id="form-anticipo">
                         <div class="form-group">
-                            <label for="anticipo_cliente">Cliente:</label>
-                            <select id="anticipo_cliente" name="anticipo_cliente" class="form-control">
-                                @foreach ($clientes as $cliente)
-                                    <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
-                                @endforeach
-                            </select>
+                            <label for="anticipo_cliente">Buscar Cliente:</label>
+                            <input type="text" class="form-control" id="anticipo_cliente"
+                                placeholder="Empieza a escribir el nombre del cliente...">
+                            <input type="hidden" id="cliente_id" name="cliente_id">
+                            <!-- Campo oculto para almacenar el ID -->
                         </div>
+
                         <div class="form-group">
                             <label for="anticipo_forma_pago">Forma de Pago:</label>
                             <select id="anticipo_forma_pago" name="anticipo_forma_pago" class="form-control">
@@ -197,8 +213,15 @@
                         </div>
                         <div class="form-group">
                             <label for="anticipo_monto">Monto:</label>
-                            <input type="text" id="anticipo_monto" name="anticipo_monto" class="form-control">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Q.</span> <!-- Aquí se antepone "Q." -->
+                                </div>
+                                <input type="number" step="0.01" id="anticipo_monto" name="anticipo_monto"
+                                    class="form-control text-right">
+                            </div>
                         </div>
+
                         <div class="form-group">
                             <label for="anticipo_observaciones">Observaciones:</label>
                             <textarea id="anticipo_observaciones" name="anticipo_observaciones" class="form-control"></textarea>
@@ -243,6 +266,21 @@
             let documentosSeleccionados = [];
             let saldoTotal = 0;
 
+            document.getElementById('monto_a_operar').addEventListener('blur', function() {
+                let value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2); // Siempre formatea a 2 decimales
+                }
+            });
+
+            document.getElementById('anticipo_monto').addEventListener('blur', function() {
+                let value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2); // Convierte el valor a dos decimales
+                }
+            });
+
+
             document.getElementById('cliente').addEventListener('change', function() {
                 var clienteId = this.value;
 
@@ -257,11 +295,12 @@
 
                 if (clienteId) {
                     fetch('/deudores/anticipos/' + clienteId)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                        document.getElementById('anticipo_label').innerHTML = "Disponible: Q." + data.toFixed(2);
-                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            document.getElementById('anticipo_label').innerHTML = "Disponible: Q." +
+                                data.toFixed(2);
+                        })
                     fetch('/deudores/documentos/' + clienteId)
                         .then(response => response.json())
                         .then(data => {
@@ -279,14 +318,14 @@
                                 row.dataset.saldo = saldoDocto;
                                 row.dataset.fecha = documento.fechaDocto;
                                 row.innerHTML = `
-                            <td><input type="checkbox" class="document-checkbox"></td>
-                            <td>${documento.Nro_docto}</td>
-                            <td>${documento.fechaDocto}</td>
-                            <td>Q. ${montoDocto}</td>
-                            <td>${documento.nroPagos}</td>
-                            <td>Q. ${acumuladoPagos}</td>
-                            <td><b>Q. ${saldoDocto}</b></td>
-                        `;
+                        <td><input type="checkbox" class="document-checkbox"></td>
+                        <td>${documento.Nro_docto}</td>
+                        <td>${documento.fechaDocto}</td>
+                        <td>Q. ${montoDocto}</td>
+                        <td>${documento.nroPagos}</td>
+                        <td>Q. ${acumuladoPagos}</td>
+                        <td><b>Q. ${saldoDocto}</b></td>
+                    `;
                                 documentosTable.appendChild(row);
 
                                 // Añadir evento de clic a cada fila de documento para cargar los pagos aplicados
@@ -304,12 +343,12 @@
                                                 var row = document
                                                     .createElement('tr');
                                                 row.innerHTML = `
-                                            <td>${pago.id}</td>
-                                            <td>${pago.pago_enc.fecha}</td>
-                                            <td>${pago.pago_enc.forma_pago.nombre}</td>
-                                            <td>${pago.pago_enc.referencia}</td>
-                                            <td>Q. ${parseFloat(pago.monto_aplicado).toFixed(2)}</td>
-                                        `;
+                                        <td>${pago.id}</td>
+                                        <td>${pago.pago_enc.fecha}</td>
+                                        <td>${pago.pago_enc.forma_pago.nombre}</td>
+                                        <td>${pago.pago_enc.referencia}</td>
+                                        <td>Q. ${parseFloat(pago.monto_aplicado).toFixed(2)}</td>
+                                    `;
                                                 pagosAplicadosTable
                                                     .appendChild(row);
                                             });
@@ -365,27 +404,26 @@
                     document.getElementById('cuenta_bancaria').style.display = 'block';
                     document.getElementById('div_documento').style.display = 'block';
                     document.getElementById('div_cuenta_bancaria').style.display = 'block';
-                }
-                else if(selectedValue == '5'){
+                } else if (selectedValue == '5') {
                     document.getElementById('anticipo_label').style.display = 'block';
                 }
             });
 
             document.getElementById('anticipo_forma_pago').addEventListener('change', function() {
-                    var selectedValue = this.value;
-                    document.getElementById('div_anticipo_referencia').style.display = 'none';
-                    document.getElementById('div_anticipo_cuenta_bancaria').style.display = 'none';
-                    if (selectedValue == '3' || selectedValue == '4') {
-                        document.getElementById('div_anticipo_referencia').style.display = 'block';
-                        document.getElementById('div_anticipo_cuenta_bancaria').style.display = 'block';
-                    }
-                });
+                var selectedValue = this.value;
+                document.getElementById('div_anticipo_referencia').style.display = 'none';
+                document.getElementById('div_anticipo_cuenta_bancaria').style.display = 'none';
+                if (selectedValue == '3' || selectedValue == '4') {
+                    document.getElementById('div_anticipo_referencia').style.display = 'block';
+                    document.getElementById('div_anticipo_cuenta_bancaria').style.display = 'block';
+                }
+            });
 
             document.getElementById('form-anticipo').addEventListener('submit', function(event) {
                 event.preventDefault();
 
                 var data = {
-                    cliente_id: document.getElementById('anticipo_cliente').value,
+                    cliente_id: document.getElementById('cliente_id').value,
                     forma_pago: document.getElementById('anticipo_forma_pago').value,
                     fecha: document.getElementById('anticipo_fecha').value,
                     monto: document.getElementById('anticipo_monto').value,
@@ -452,4 +490,209 @@
         });
     </script>
 
+@stop
+
+@section('js')
+    <!-- Incluye jQuery UI para el autocompletado -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#cliente').autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{{ route('buscar.cliente') }}", // Ruta que crearemos en el controlador
+                        dataType: 'json',
+                        data: {
+                            term: request.term // Lo que el usuario escribe
+                        },
+                        success: function(data) {
+                            response($.map(data, function(item) {
+                                return {
+                                    label: item
+                                        .nombre, // Lo que aparece en el dropdown
+                                    value: item.id, // Lo que se selecciona
+                                    id: item
+                                        .id // Puedes obtener el id si lo necesitas
+                                };
+                            }));
+                        }
+                    });
+                },
+                minLength: 3, // Mínimo de caracteres para empezar a buscar
+                select: function(event, ui) {
+                    var clienteId = ui.item.id;
+
+                    // Limpia la tabla de documentos
+                    var documentosTable = document.getElementById('documentos-table').querySelector(
+                        'tbody');
+                    documentosTable.innerHTML = '';
+
+                    documentosSeleccionados = [];
+                    saldoTotal = 0;
+                    document.getElementById('saldo_total').value = '';
+                    document.getElementById('monto_seleccionado').value = '';
+
+                    if (clienteId) {
+                        // Fetch de anticipos del cliente seleccionado
+                        fetch('/deudores/anticipos/' + clienteId)
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('anticipo_label').innerHTML =
+                                    "Disponible: Q." + data.toFixed(2);
+                            });
+
+                        // Fetch de documentos del cliente seleccionado
+                        fetch('/deudores/documentos/' + clienteId)
+                            .then(response => response.json())
+                            .then(data => {
+                                saldoTotal = data.reduce((acc, doc) => acc + parseFloat(doc
+                                    .saldoDocto), 0);
+                                document.getElementById('saldo_total').value = saldoTotal.toFixed(
+                                    2);
+
+                                data.forEach(documento => {
+                                    var row = document.createElement('tr');
+                                    var montoDocto = parseFloat(documento.montoDocto)
+                                        .toFixed(2);
+                                    var saldoDocto = parseFloat(documento.saldoDocto)
+                                        .toFixed(2);
+                                    var acumuladoPagos = parseFloat(documento
+                                        .totalAcumuladoPagos).toFixed(2);
+                                    row.classList.add('document-row');
+                                    row.dataset.id = documento.id;
+                                    row.dataset.saldo = saldoDocto;
+                                    row.dataset.fecha = documento.fechaDocto;
+                                    row.innerHTML = `
+                        <td><input type="checkbox" class="document-checkbox"></td>
+                        <td>${documento.Nro_docto}</td>
+                        <td>${documento.fechaDocto}</td>
+                        <td>Q. ${montoDocto}</td>
+                        <td>${documento.nroPagos}</td>
+                        <td>Q. ${acumuladoPagos}</td>
+                        <td><b>Q. ${saldoDocto}</b></td>
+                    `;
+                                    documentosTable.appendChild(row);
+
+                                    // Añadir evento para cargar los pagos aplicados cuando se haga clic en una fila
+                                    row.addEventListener('click', function() {
+                                        var documentoId = this.dataset.id;
+                                        fetch(
+                                                `/deudores/pagos-aplicados/${documentoId}`
+                                            )
+                                            .then(response => response.json())
+                                            .then(pagos => {
+                                                var pagosAplicadosTable =
+                                                    document.getElementById(
+                                                        'pagos-aplicados-table')
+                                                    .querySelector('tbody');
+                                                pagosAplicadosTable.innerHTML =
+                                                    '';
+                                                pagos.forEach(pago => {
+                                                    var row = document
+                                                        .createElement(
+                                                            'tr');
+                                                    row.innerHTML = `
+                                        <td>${pago.id}</td>
+                                        <td>${pago.pago_enc.fecha}</td>
+                                        <td>${pago.pago_enc.forma_pago.nombre}</td>
+                                        <td>${pago.pago_enc.referencia}</td>
+                                        <td>Q. ${parseFloat(pago.monto_aplicado).toFixed(2)}</td>
+                                    `;
+                                                    pagosAplicadosTable
+                                                        .appendChild(
+                                                            row);
+                                                });
+                                            });
+                                    });
+                                });
+
+                                // Manejo de selección de documentos
+                                document.querySelectorAll('.document-checkbox').forEach(function(
+                                    checkbox) {
+                                    checkbox.addEventListener('change', function() {
+                                        var row = this.closest('tr');
+                                        var saldo = parseFloat(row.dataset.saldo);
+                                        var documentoId = row.dataset.id;
+                                        var fechaDocto = row.dataset.fecha;
+
+                                        if (this.checked) {
+                                            documentosSeleccionados.push({
+                                                id: documentoId,
+                                                saldo: saldo,
+                                                fechaDocto: fechaDocto
+                                            });
+                                        } else {
+                                            documentosSeleccionados =
+                                                documentosSeleccionados.filter(
+                                                    doc => doc.id !== documentoId);
+                                        }
+
+                                        var montoSeleccionado =
+                                            documentosSeleccionados.reduce((acc,
+                                                doc) => acc + doc.saldo, 0);
+                                        document.getElementById(
+                                                'monto_seleccionado').value =
+                                            montoSeleccionado.toFixed(2);
+
+                                        // Ordenar documentos seleccionados por fecha en orden ascendente
+                                        documentosSeleccionados.sort(function(a,
+                                            b) {
+                                            return new Date(a.fechaDocto) -
+                                                new Date(b.fechaDocto);
+                                        });
+                                    });
+                                });
+                            });
+                    }
+                }
+
+            });
+            // Inicializar el autocompletado
+            $('#anticipo_cliente').autocomplete({
+                source: function(request, response) {
+                    console.log('Autocompletar iniciado');
+                    $.ajax({
+                        url: "{{ route('buscar.cliente') }}",
+                        dataType: 'json',
+                        data: {
+                            term: request.term
+                        },
+                        success: function(data) {
+                            console.log('Datos recibidos: ', data);
+                            response($.map(data, function(item) {
+                                return {
+                                    label: item
+                                        .nombre, // Mostrar el nombre del cliente
+                                    value: item
+                                        .id, // Lo que se selecciona (el id del cliente)
+                                    id: item.id // El ID del cliente
+                                };
+                            }));
+                            $('.ui-autocomplete').css('z-index', '1050');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error en la solicitud: ', error);
+                        }
+                    });
+                },
+                select: function(event, ui) {
+                    console.log('Cliente seleccionado: ', ui.item);
+                    $('#anticipo_cliente').val(ui.item
+                        .label); // Asignar el nombre del cliente al input visible
+                    $('#cliente_id').val(ui.item.id); // Asignar el ID del cliente al input oculto
+                    return false; // Evitar el comportamiento por defecto de autocomplete
+                },
+                focus: function(event, ui) {
+                    $('#anticipo_cliente').val(ui.item
+                        .label); // Mantener el valor de texto mientras navega
+                    return false;
+                }
+            });
+
+
+
+        });
+    </script>
 @stop

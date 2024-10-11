@@ -50,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/movimiento/store', [ListadoMovimientosController::class, 'store'])->name('movimiento.store');
     Route::post('/anticipos', [DeudoresController::class, 'storeAnticipo'])->name('anticipos.store');
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/buscar-cliente', [DeudoresController::class, 'buscarCliente'])->name('buscar.cliente');
+
 });
 
 Route::get('/impresion_orden/{id}', [ListadoOrdenController::class, 'generateReport'])->name('voting-result');
