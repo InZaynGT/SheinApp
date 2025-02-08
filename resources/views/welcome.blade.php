@@ -111,7 +111,7 @@
         <nav class="navbar navbar-expand-lg">
             <div class="container">
                 <a class="navbar-brand" href="/">
-                    <img src="{{ asset('vendor/adminlte/dist/img/logo.jpg') }}" alt="Logo">
+                    <img src="../../public/vendor/adminlte/dist/img/logo.jpg" alt="Logo">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -151,7 +151,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="{{ asset('vendor/adminlte/dist/img/ropa.jpg') }}" class="card-img-top" alt="Ropa">
+                        <img src="vendor/adminlte/dist/img/ropa.jpg" class="card-img-top" alt="Ropa">
                         <div class="card-body text-center">
                             <p class="category-title">Ropa</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
