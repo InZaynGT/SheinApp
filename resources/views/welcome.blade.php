@@ -151,7 +151,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="vendor/adminlte/dist/img/ropa.jpg" class="card-img-top" alt="Ropa">
+                        <img src="../../public/vendor/adminlte/dist/img/ropa.jpg" class="card-img-top" alt="Ropa">
                         <div class="card-body text-center">
                             <p class="category-title">Ropa</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
@@ -160,7 +160,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="vendor/adminlte/dist/img/accesorios.jpg" class="card-img-top" alt="Accesorios">
+                        <img src="../../public/vendor/adminlte/dist/img/accesorios.jpg" class="card-img-top" alt="Accesorios">
                         <div class="card-body text-center">
                             <p class="category-title">Accesorios</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
@@ -169,7 +169,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="vendor/adminlte/dist/img/zapatos.jpg" class="card-img-top" alt="Zapatos">
+                        <img src="../../public/vendor/adminlte/dist/img/zapatos.jpg" class="card-img-top" alt="Zapatos">
                         <div class="card-body text-center">
                             <p class="category-title">Zapatos</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
@@ -178,7 +178,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="vendor/adminlte/dist/img/images.png" class="card-img-top" alt="Hogar">
+                        <img src="../../public/vendor/adminlte/dist/img/images.png" class="card-img-top" alt="Hogar">
                         <div class="card-body text-center">
                             <p class="category-title">Hogar</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
