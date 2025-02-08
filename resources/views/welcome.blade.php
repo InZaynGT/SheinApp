@@ -27,7 +27,7 @@
         }
 
         .hero-section {
-            background: url('vendor/adminlte/dist/img/background.jpg');
+            background: url('../../public/vendor/adminlte/dist/img/background.jpg');
             background-size: cover;
             background-position: center;
             height: 50vh;
