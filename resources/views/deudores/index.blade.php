@@ -215,7 +215,7 @@
                             <label for="anticipo_monto">Monto:</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text">Q.</span> <!-- Aquí se antepone "Q." -->
+                                    <span class="input-group-text">Q.</span> 
                                 </div>
                                 <input type="number" step="0.01" id="anticipo_monto" name="anticipo_monto"
                                     class="form-control text-right">
