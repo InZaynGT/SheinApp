@@ -133,11 +133,11 @@
             <div>
                 <h1>Bienvenido a Jude's Boutique</h1>
                 @if (Route::has('login'))
-                    @auth
-                        <a href="{{ url('/home') }}" class="btn btn-gold btn-lg mt-3">Ir a Home</a>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-gold btn-lg mt-3">Inicia Sesión</a>
-                    @endauth
+                @auth
+                <a href="{{ url('/home') }}" class="btn btn-gold btn-lg mt-3">Ir a Home</a>
+                @else
+                <a href="{{ route('login') }}" class="btn btn-gold btn-lg mt-3">Inicia Sesión</a>
+                @endauth
                 @endif
             </div>
         </section>
@@ -151,7 +151,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="../../public/vendor/adminlte/dist/img/ropa.jpg" class="card-img-top" alt="Ropa">
+                        <img src="{{ config('app.url') }}/vendor/adminlte/dist/img/ropa.jpg" class="card-img-top" alt="Ropa">
                         <div class="card-body text-center">
                             <p class="category-title">Ropa</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
