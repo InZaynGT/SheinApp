@@ -1,0 +1,35 @@
+name: Deploy to DigitalOcean Droplet
+
+on:
+  push:
+    branches:
+      - main  # Cambia a 'master' si usas master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clonar el repositorio en la máquina virtual de GitHub
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurar la llave SSH para conectarse al Droplet
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.DROPLET_SSH_KEY }}
+
+      # 3. Conectarse al Droplet y ejecutar los comandos de actualización
+      - name: Deploy to Droplet
+        run: |
+          ssh -o StrictHostKeyChecking=no root@161.35.109.217 << 'EOF'
+            cd /var/www/tofenterprise.org
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            sudo systemctl reload apache2
+          EOF
