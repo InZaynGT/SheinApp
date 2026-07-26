@@ -79,10 +79,6 @@
                                 <i class="fas fa-edit"></i>
                                 <span class="d-none d-sm-inline">Editar</span>
                             </button>
-                            <button type="button" class="btn btn-danger" onclick="confirmDelete({{ $order->id }})">
-                                <i class="fas fa-trash"></i>
-                                <span class="d-none d-sm-inline">Eliminar</span>
-                            </button>
                         </div>
                     </td>
                 </tr>
@@ -210,15 +206,6 @@
         </div>
     </div>
 </div>
-
-<!-- Script para confirmar eliminación -->
-<script>
-    function confirmDelete(id) {
-        if (confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
-            window.location.href = "{{ route('cliente.destroy', '') }}/" + id;
-        }
-    }
-</script>
 
 <!-- Scripts de DataTables con configuración mobile-friendly -->
 @push('js')
