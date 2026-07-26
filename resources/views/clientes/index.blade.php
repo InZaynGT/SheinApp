@@ -3,7 +3,7 @@
 @section('title', 'Listado de Clientes')
 
 @section('content_header')
-    <h1 class="m-0 text-dark">Clientes</h1>
+<h1 class="m-0 text-dark">Clientes</h1>
 @stop
 
 @section('content')
@@ -14,56 +14,35 @@
                 <i class="fas fa-plus"></i> Nuevo Cliente
             </button>
         </div>
-        <div class="col-12 col-md-6">
-            <div class="d-flex gap-2">
-                <input type="text" class="form-control" id="customSearch" placeholder="Buscar cliente...">
-                <button class="btn btn-outline-secondary" id="clearSearch" type="button">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
     </div>
-    
+
     <div class="table-responsive">
         <table class="table table-striped table-hover table-sm" id="clientsTable">
             <thead class="table-light">
                 <tr>
-                    <th class="d-none d-md-table-cell">ID</th>
+                    <th>ID</th>
                     <th>Cliente</th>
-                    <th class="d-none d-lg-table-cell">Dirección</th>
-                    <th class="d-none d-sm-table-cell">Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
                     <th class="text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($clientes as $order)
+                @foreach($clientes as $cliente)
                 <tr>
-                    <td class="d-none d-md-table-cell">{{ $order->id }}</td>
-                    <td>
-                        <strong>{{ $order->nombre }}</strong>
-                        <div class="d-md-none small text-muted">
-                            @if($order->direccion)
-                                <i class="fas fa-map-pin"></i> {{ Str::limit($order->direccion, 30) }}<br>
-                            @endif
-                            @if($order->telefono)
-                                <i class="fas fa-phone"></i> {{ $order->telefono }}
-                            @endif
-                        </div>
-                    </td>
-                    <td class="d-none d-lg-table-cell">{{ $order->direccion }}</td>
-                    <td class="d-none d-sm-table-cell">{{ $order->telefono }}</td>
+                    <td>{{ $cliente->id }}</td>
+                    <td>{{ $cliente->nombre }}</td>
+                    <td>{{ $cliente->direccion }}</td>
+                    <td>{{ $cliente->telefono }}</td>
                     <td class="text-center">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editClientModal"
-                                data-id="{{ $order->id }}"
-                                data-nombre="{{ $order->nombre }}"
-                                data-direccion="{{ $order->direccion }}"
-                                data-telefono="{{ $order->telefono }}"
-                                data-type="{{ $order->tipo_cli }}">
-                                <i class="fas fa-edit"></i>
-                                <span class="d-none d-sm-inline">Editar</span>
-                            </button>
-                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editClientModal"
+                            data-id="{{ $cliente->id }}"
+                            data-nombre="{{ $cliente->nombre }}"
+                            data-direccion="{{ $cliente->direccion }}"
+                            data-telefono="{{ $cliente->telefono }}"
+                            data-type="{{ $cliente->tipo_cli }}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -86,34 +65,34 @@
                 <form id="editClientForm" method="POST" action="{{ route('cliente.update') }}">
                     @csrf
                     @method('PUT')
-                    <input type="hidden" name="id" id="clientId">
+                    <input type="hidden" name="id" id="editClientId">
 
                     <div class="mb-3">
-                        <label for="clientName" class="form-label">
+                        <label for="editClientName" class="form-label">
                             <i class="fas fa-user"></i> Nombre
                         </label>
-                        <input type="text" class="form-control" id="clientName" name="nombre" required>
+                        <input type="text" class="form-control" id="editClientName" name="nombre" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="clientAddress" class="form-label">
+                        <label for="editClientAddress" class="form-label">
                             <i class="fas fa-map-pin"></i> Dirección
                         </label>
-                        <input type="text" class="form-control" id="clientAddress" name="direccion">
+                        <input type="text" class="form-control" id="editClientAddress" name="direccion">
                     </div>
 
                     <div class="mb-3">
-                        <label for="clientPhone" class="form-label">
+                        <label for="editClientPhone" class="form-label">
                             <i class="fas fa-phone"></i> Teléfono
                         </label>
-                        <input type="text" class="form-control" id="clientPhone" name="telefono">
+                        <input type="text" class="form-control" id="editClientPhone" name="telefono">
                     </div>
 
                     <div class="mb-3">
-                        <label for="clientType" class="form-label">
+                        <label for="editClientType" class="form-label">
                             <i class="fas fa-tag"></i> Tipo de Cliente
                         </label>
-                        <select id="clientType" name="tipo_cliente" class="form-select" required>
+                        <select id="editClientType" name="tipo_cliente" class="form-select" required>
                             <option value="" disabled>Seleccionar tipo</option>
                             <option value="0">Entidad</option>
                             <option value="1">Hombre</option>
@@ -147,17 +126,17 @@
                 <form id="addClientForm" method="POST" action="{{ route('cliente.store') }}">
                     @csrf
                     <div class="mb-3">
-                        <label for="newClientName" class="form-label">
+                        <label for="addClientName" class="form-label">
                             <i class="fas fa-user"></i> Nombre
                         </label>
-                        <input type="text" class="form-control" id="newClientName" name="nombre" required>
+                        <input type="text" class="form-control" id="addClientName" name="nombre" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="newClientType" class="form-label">
+                        <label for="addClientType" class="form-label">
                             <i class="fas fa-tag"></i> Tipo de Cliente
                         </label>
-                        <select id="newClientType" name="tipo_cliente" class="form-select" required>
+                        <select id="addClientType" name="tipo_cliente" class="form-select" required>
                             <option value="" disabled selected>Seleccionar tipo</option>
                             <option value="0">Entidad</option>
                             <option value="1">Hombre</option>
@@ -166,17 +145,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="newClientAddress" class="form-label">
+                        <label for="addClientAddress" class="form-label">
                             <i class="fas fa-map-pin"></i> Dirección
                         </label>
-                        <input type="text" class="form-control" id="newClientAddress" name="direccion" required>
+                        <input type="text" class="form-control" id="addClientAddress" name="direccion" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="newClientPhone" class="form-label">
+                        <label for="addClientPhone" class="form-label">
                             <i class="fas fa-phone"></i> Teléfono
                         </label>
-                        <input type="text" class="form-control" id="newClientPhone" name="telefono" required>
+                        <input type="text" class="form-control" id="addClientPhone" name="telefono" required>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -191,43 +170,40 @@
     </div>
 </div>
 
-<!-- Scripts de DataTables con configuración mobile-friendly -->
 @push('js')
 <script>
-    $(document).ready(function() {
-
+    document.addEventListener('DOMContentLoaded', function() {
         // Modal de edición
-        var editClientModal = document.getElementById('editClientModal');
-        editClientModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var clientId = button.getAttribute('data-id');
-            var clientName = button.getAttribute('data-nombre');
-            var clientAddress = button.getAttribute('data-direccion');
-            var clientPhone = button.getAttribute('data-telefono');
-            var clientType = button.getAttribute('data-type');
+        var editModal = document.getElementById('editClientModal');
+        if (editModal) {
+            editModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget;
+                var clientId = button.getAttribute('data-id');
+                var clientName = button.getAttribute('data-nombre');
+                var clientAddress = button.getAttribute('data-direccion');
+                var clientPhone = button.getAttribute('data-telefono');
+                var clientType = button.getAttribute('data-type');
 
-            document.getElementById('clientId').value = clientId;
-            document.getElementById('clientName').value = clientName;
-            document.getElementById('clientAddress').value = clientAddress;
-            document.getElementById('clientPhone').value = clientPhone;
-            document.getElementById('clientType').value = clientType;
-        });
-
-        // Cerrar modales con tecla ESC
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape') {
-                $('.modal').modal('hide');
-            }
-        });
-
-        // Touch-friendly para dispositivos móviles
-        if ('ontouchstart' in window) {
-            $('.btn-group .btn').on('touchstart', function() {
-                $(this).addClass('active');
-            }).on('touchend', function() {
-                $(this).removeClass('active');
+                document.getElementById('editClientId').value = clientId || '';
+                document.getElementById('editClientName').value = clientName || '';
+                document.getElementById('editClientAddress').value = clientAddress || '';
+                document.getElementById('editClientPhone').value = clientPhone || '';
+                document.getElementById('editClientType').value = clientType || '';
             });
         }
+
+        // Cerrar modales con tecla ESC (Bootstrap 5 ya lo hace, pero por si acaso)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var modals = document.querySelectorAll('.modal.show');
+                modals.forEach(function(modal) {
+                    var bsModal = bootstrap.Modal.getInstance(modal);
+                    if (bsModal) {
+                        bsModal.hide();
+                    }
+                });
+            }
+        });
     });
 </script>
 @endpush
