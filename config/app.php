@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://tofenterprise.org'),
+    'url' => env('APP_URL', 'https://boutique.tofenterprise.org'),
 
     'asset_url' => env('ASSET_URL', null),
 
