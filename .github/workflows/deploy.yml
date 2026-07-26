@@ -24,7 +24,7 @@ jobs:
       - name: Deploy to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.109.217 << 'EOF'
-            cd /var/www/tofenterprise.org
+            cd /var/www/boutique.tofenterprise.org
             git pull origin main
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
