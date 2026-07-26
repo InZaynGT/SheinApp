@@ -1,4 +1,4 @@
-name: Deploy to DigitalOcean Droplet
+name: 🐞 DEBUG Deploy to DigitalOcean
 
 on:
   push:
@@ -10,47 +10,192 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
+      - name: 🔑 Setup SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.DROPLET_SSH_KEY }}
 
-      - name: Deploy to Droplet
+      - name: 🚀 Debug Deploy to Droplet
         run: |
-          ssh -o StrictHostKeyChecking=no root@161.35.109.217 << 'EOF'
-            echo "=== 1. Entrando a la carpeta ==="
-            cd /var/www/boutique.tofenterprise.org
-            pwd
+          ssh -o StrictHostKeyChecking=no -v root@161.35.109.217 << 'EOF'
+            # ============================================
+            # 1. DIAGNÓSTICO INICIAL
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 1: DIAGNÓSTICO DEL SISTEMA"
+            echo "========================================="
+            echo "📅 Fecha y hora: $(date)"
+            echo "👤 Usuario actual: $(whoami)"
+            echo "📂 Directorio actual: $(pwd)"
+            echo "🐧 Versión de Ubuntu: $(lsb_release -d | cut -f2)"
+            echo ""
 
-            echo "=== 2. Estado actual del repositorio ==="
-            git status
-            git log -1 --oneline
+            # ============================================
+            # 2. VERIFICAR LA CARPETA DEL PROYECTO
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 2: VERIFICANDO CARPETA DEL PROYECTO"
+            echo "========================================="
+            echo "📂 Verificando si existe /var/www/boutique.tofenterprise.org"
+            if [ -d "/var/www/boutique.tofenterprise.org" ]; then
+              echo "✅ La carpeta EXISTE"
+              ls -la /var/www/boutique.tofenterprise.org
+            else
+              echo "❌ LA CARPETA NO EXISTE"
+              exit 1
+            fi
+            echo ""
 
-            echo "=== 3. Haciendo git pull ==="
+            # ============================================
+            # 3. CONFIGURAR GIT SAFE.DIRECTORY
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 3: CONFIGURANDO GIT"
+            echo "========================================="
+            echo "🔧 Agregando safe.directory para Git..."
+            git config --global --add safe.directory /var/www/boutique.tofenterprise.org
+            echo "✅ Configuración aplicada"
+            echo ""
+
+            # ============================================
+            # 4. ENTRAR A LA CARPETA Y VER ESTADO DEL REPO
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 4: ESTADO DEL REPOSITORIO"
+            echo "========================================="
+            cd /var/www/boutique.tofenterprise.org || exit 1
+            echo "📂 Directorio actual: $(pwd)"
+            echo ""
+            echo "🔍 Verificando si es un repositorio Git..."
+            if [ -d ".git" ]; then
+              echo "✅ Es un repositorio Git"
+              echo "🌿 Rama actual: $(git branch --show-current)"
+              echo "📜 Últimos 3 commits:"
+              git log --oneline -3
+            else
+              echo "❌ NO es un repositorio Git (no existe .git)"
+              exit 1
+            fi
+            echo ""
+
+            # ============================================
+            # 5. GIT PULL (CON SALIDA DETALLADA)
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 5: EJECUTANDO GIT PULL"
+            echo "========================================="
+            echo "🔄 Haciendo git pull desde origin main..."
+            echo "=== SALIDA DE GIT PULL ==="
             git pull origin main
+            PULL_EXIT_CODE=$?
+            echo "=== FIN DE GIT PULL ==="
+            echo "📊 Código de salida de git pull: $PULL_EXIT_CODE"
+            if [ $PULL_EXIT_CODE -eq 0 ]; then
+              echo "✅ Git pull ejecutado correctamente"
+            else
+              echo "❌ Git pull falló con código: $PULL_EXIT_CODE"
+              exit $PULL_EXIT_CODE
+            fi
+            echo ""
 
-            echo "=== 4. Instalando dependencias ==="
+            # ============================================
+            # 6. MOSTRAR CAMBIOS DESPUÉS DEL PULL
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 6: ESTADO DESPUÉS DE GIT PULL"
+            echo "========================================="
+            echo "📜 Último commit después del pull:"
+            git log -1 --oneline
+            echo "📂 Archivos modificados (si hay cambios):"
+            git status --short
+            echo ""
+
+            # ============================================
+            # 7. COMPOSER INSTALL
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 7: INSTALANDO DEPENDENCIAS (COMPOSER)"
+            echo "========================================="
+            echo "📦 Instalando dependencias de PHP..."
+            export COMPOSER_ALLOW_SUPERUSER=1
             composer install --no-dev --optimize-autoloader --no-interaction
+            COMPOSER_EXIT_CODE=$?
+            echo "📊 Código de salida de composer: $COMPOSER_EXIT_CODE"
+            if [ $COMPOSER_EXIT_CODE -eq 0 ]; then
+              echo "✅ Composer ejecutado correctamente"
+            else
+              echo "❌ Composer falló con código: $COMPOSER_EXIT_CODE"
+              exit $COMPOSER_EXIT_CODE
+            fi
+            echo ""
 
-            echo "=== 5. Limpiando caché de Laravel ==="
+            # ============================================
+            # 8. LIMPIAR CACHÉ DE LARAVEL
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 8: LIMPIANDO CACHÉ DE LARAVEL"
+            echo "========================================="
+            echo "🧹 Limpiando caché de Laravel..."
             php artisan cache:clear
             php artisan config:clear
             php artisan view:clear
+            echo "✅ Caché limpiada"
+            echo ""
 
-            echo "=== 6. Ejecutando migraciones ==="
+            # ============================================
+            # 9. MIGRACIONES
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 9: EJECUTANDO MIGRACIONES"
+            echo "========================================="
+            echo "🔄 Ejecutando migraciones..."
             php artisan migrate --force
+            MIGRATE_EXIT_CODE=$?
+            echo "📊 Código de salida de migrate: $MIGRATE_EXIT_CODE"
+            if [ $MIGRATE_EXIT_CODE -eq 0 ]; then
+              echo "✅ Migraciones ejecutadas correctamente"
+            else
+              echo "❌ Migraciones fallaron con código: $MIGRATE_EXIT_CODE"
+              exit $MIGRATE_EXIT_CODE
+            fi
+            echo ""
 
-            echo "=== 7. Generando cachés ==="
+            # ============================================
+            # 10. GENERAR CACHÉS DE LARAVEL
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 10: GENERANDO CACHÉS DE LARAVEL"
+            echo "========================================="
+            echo "⚡ Generando cachés de Laravel..."
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+            echo "✅ Cachés generadas"
+            echo ""
 
-            echo "=== 8. Reiniciando Apache ==="
+            # ============================================
+            # 11. REINICIAR APACHE
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 11: REINICIANDO APACHE"
+            echo "========================================="
+            echo "🔄 Reiniciando Apache..."
             sudo systemctl reload apache2
+            echo "✅ Apache reiniciado"
+            echo ""
 
-            echo "=== 9. Verificando el último commit ==="
+            # ============================================
+            # 12. VERIFICACIÓN FINAL
+            # ============================================
+            echo "========================================="
+            echo "📍 PASO 12: VERIFICACIÓN FINAL"
+            echo "========================================="
+            echo "✅ El deploy se completó exitosamente"
+            echo "📅 Hora de finalización: $(date)"
+            echo "📜 Último commit desplegado:"
             git log -1 --oneline
+            echo "========================================="
           EOF
