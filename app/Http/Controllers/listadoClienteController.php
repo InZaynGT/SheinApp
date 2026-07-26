@@ -11,7 +11,7 @@ class listadoClienteController extends Controller
     public function index()
     {
         //Mandamos a traer la info de la BDD y la almacenamos en $ordenes
-        $clientes = clienteModel::where('estado',1)->get;
+        $clientes = clienteModel::where('estado',1)->get();
         //Retornamos la vista (pasamos la ruta) y pasamos el parámetro de la variable de ordenes
         return view('clientes.index', compact('clientes'));
     }
