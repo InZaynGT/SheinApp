@@ -123,7 +123,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="addClientForm" method="POST" action="{{ route('cliente.store') }}">
+                <form id="addClientForm" method="POST" action="{{ route('clientes.store') }}">
                     @csrf
                     <div class="mb-3">
                         <label for="addClientName" class="form-label">
