@@ -111,7 +111,7 @@
         <nav class="navbar navbar-expand-lg">
             <div class="container">
                 <a class="navbar-brand" href="/">
-                    <img src="../../public/vendor/adminlte/dist/img/logo.jpg" alt="Logo">
+                    <img src="{{ config('app.url') }}/vendor/adminlte/dist/img/logo.jpg" class="card-img-top" alt="Ropa">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
