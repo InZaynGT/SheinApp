@@ -9,7 +9,7 @@
 @section('content')
 <div class="container-fluid px-2 px-md-3">
     <div class="row mb-3">
-        <div class="col-12 col-md-6 mb-2 mb-md-0">
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
             <button type="button" class="btn btn-success w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addClientModal">
                 <i class="fas fa-plus"></i> Nuevo Cliente
             </button>
@@ -195,79 +195,6 @@
 @push('js')
 <script>
     $(document).ready(function() {
-        // Inicializar DataTable con configuración responsive
-        var table = $('#clientsTable').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json",
-                "search": "Buscar:",
-                "lengthMenu": "Mostrar _MENU_ registros",
-                "info": "Mostrando _START_ a _END_ de _TOTAL_ clientes",
-                "infoEmpty": "No hay clientes disponibles",
-                "zeroRecords": "No se encontraron clientes"
-            },
-            "processing": true,
-            "serverSide": false,
-            "order": [[0, 'desc']],
-            "pageLength": 10,
-            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
-            "responsive": true,
-            "autoWidth": false,
-            "columnDefs": [
-                {
-                    "targets": [5],
-                    "orderable": false,
-                    "searchable": false
-                },
-                {
-                    "targets": [0],
-                    "visible": true,
-                    "responsivePriority": 3
-                },
-                {
-                    "targets": [1],
-                    "responsivePriority": 1
-                },
-                {
-                    "targets": [2],
-                    "visible": true,
-                    "responsivePriority": 4
-                },
-                {
-                    "targets": [3],
-                    "visible": true,
-                    "responsivePriority": 2
-                },
-                {
-                    "targets": [4],
-                    "visible": true,
-                    "responsivePriority": 5
-                },
-                {
-                    "targets": [5],
-                    "responsivePriority": 6
-                }
-            ],
-            "dom": '<"row"<"col-12"t>>' +
-                   '<"row"<"col-12 col-md-5"i><"col-12 col-md-7"p>>',
-            "drawCallback": function() {
-                // Asegurar que la tabla sea responsive después de cada dibujado
-                $('.dataTables_wrapper').addClass('table-responsive');
-            }
-        });
-
-        // Buscador personalizado (ocultar el buscador de DataTables)
-        $('#clientsTable_filter').hide();
-        
-        // Vincular el buscador personalizado
-        $('#customSearch').on('keyup', function() {
-            table.search(this.value).draw();
-        });
-
-        // Limpiar buscador
-        $('#clearSearch').on('click', function() {
-            $('#customSearch').val('');
-            table.search('').draw();
-        });
 
         // Modal de edición
         var editClientModal = document.getElementById('editClientModal');
