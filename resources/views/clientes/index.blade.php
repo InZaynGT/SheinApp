@@ -3,7 +3,7 @@
 @section('title', 'Listado de Clientes')
 
 @section('content_header')
-    <h1 class="m-0 text-dark">Clientes</h1>
+    <h1 class="m-0 text-dark">Listado de Clientes</h1>
 @stop
 
 @section('content')
@@ -11,7 +11,7 @@
     <div class="row mb-3">
         <div class="col-12 col-md-6 mb-2 mb-md-0">
             <button type="button" class="btn btn-success w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addClientModal">
-                <i class="fas fa-plus"></i> Agregar Cliente
+                <i class="fas fa-plus"></i> Nuevo Cliente
             </button>
         </div>
         <div class="col-12 col-md-6">
