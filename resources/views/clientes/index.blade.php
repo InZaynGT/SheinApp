@@ -32,7 +32,6 @@
                     <th>Cliente</th>
                     <th class="d-none d-lg-table-cell">Dirección</th>
                     <th class="d-none d-sm-table-cell">Teléfono</th>
-                    <th class="d-none d-md-table-cell">Tipo</th>
                     <th class="text-center">Acciones</th>
                 </tr>
             </thead>
@@ -53,21 +52,6 @@
                     </td>
                     <td class="d-none d-lg-table-cell">{{ $order->direccion }}</td>
                     <td class="d-none d-sm-table-cell">{{ $order->telefono }}</td>
-                    <td class="d-none d-md-table-cell">
-                        @switch($order->tipo_cli)
-                            @case(0)
-                                <span class="badge bg-info">Entidad</span>
-                                @break
-                            @case(1)
-                                <span class="badge bg-primary">Hombre</span>
-                                @break
-                            @case(2)
-                                <span class="badge bg-danger">Mujer</span>
-                                @break
-                            @default
-                                <span class="badge bg-secondary">Desconocido</span>
-                        @endswitch
-                    </td>
                     <td class="text-center">
                         <div class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editClientModal"
