@@ -178,7 +178,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card category-card">
-                        <img src="{{ config('app.url') }}/vendor/adminlte/dist/img/images.jpg" class="card-img-top" alt="Ropa">
+                        <img src="{{ config('app.url') }}/vendor/adminlte/dist/img/images.png" class="card-img-top" alt="Ropa">
                         <div class="card-body text-center">
                             <p class="category-title">Hogar</p>
                             <a href="#" class="btn btn-gold">Ver más</a>
