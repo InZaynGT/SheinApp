@@ -32,6 +32,8 @@ return [
 
     'use_ico_only' => true,
     'use_full_favicon' => false,
+    'use_online_resources' => true,
+
 
     /*
     |--------------------------------------------------------------------------
@@ -368,7 +370,7 @@ return [
                     'icon' => 'fas fa-exclamation-circle', // Icono de advertencia para deudores
                     'classes' => 'ml-3',
                 ],
-                
+
             ],
         ],
         [
