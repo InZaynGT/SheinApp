@@ -3,33 +3,54 @@ name: Deploy to DigitalOcean Droplet
 on:
   push:
     branches:
-      - main  # Cambia a 'master' si usas master
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar el repositorio en la máquina virtual de GitHub
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configurar la llave SSH para conectarse al Droplet
       - name: Setup SSH key
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.DROPLET_SSH_KEY }}
 
-      # 3. Conectarse al Droplet y ejecutar los comandos de actualización
       - name: Deploy to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@161.35.109.217 << 'EOF'
+            echo "=== 1. Entrando a la carpeta ==="
             cd /var/www/boutique.tofenterprise.org
+            pwd
+
+            echo "=== 2. Estado actual del repositorio ==="
+            git status
+            git log -1 --oneline
+
+            echo "=== 3. Haciendo git pull ==="
             git pull origin main
-            composer install --no-dev --optimize-autoloader
+
+            echo "=== 4. Instalando dependencias ==="
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            echo "=== 5. Limpiando caché de Laravel ==="
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan view:clear
+
+            echo "=== 6. Ejecutando migraciones ==="
             php artisan migrate --force
+
+            echo "=== 7. Generando cachés ==="
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+
+            echo "=== 8. Reiniciando Apache ==="
             sudo systemctl reload apache2
+
+            echo "=== 9. Verificando el último commit ==="
+            git log -1 --oneline
           EOF
