@@ -80,9 +80,16 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center">
+        {{ $clientes->links('vendor.pagination.bootstrap-4') }}
+    </div>
+
 </div>
 
 <!-- Modal para Editar Cliente -->
+
 <div class="modal fade" id="editClientModal" tabindex="-1" aria-labelledby="editClientModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">

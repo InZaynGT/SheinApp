@@ -25,9 +25,11 @@ class ClienteController extends Controller
             $query->where('tipo_cli', $tipoCliente);
         }
 
-        $clientes = $query->get();
+        $clientes = $query->paginate(10)->withQueryString();
+
 
         return view('clientes.index', compact('clientes', 'nombre', 'tipoCliente'));
+
     }
 
 

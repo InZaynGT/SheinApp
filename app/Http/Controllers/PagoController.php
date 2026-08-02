@@ -62,7 +62,9 @@ class PagoController extends Controller
             $query->where('pago_enc.NRO_DOCTO_BANCARIO', 'LIKE', '%' . $nroDocumento . '%');
         }
 
-        $listado_pagos = $query->orderBy('id', 'desc')->get();
+        $listado_pagos = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
+
+
 
         $formasPago = FormaPago::all();
         $cuentasBancarias = cuentaBancariaModel::all();

@@ -31,7 +31,9 @@ class MovimientoBancarioController extends Controller
             $query->whereDate('fecha', '<=', $fechaFin);
         }
 
-        $mov_banc = $query->get();
+        $mov_banc = $query->paginate(10)->withQueryString();
+
+
         $cuentas_bancarias = cuentaBancariaModel::all();
 
         return view('movimientos.index', compact('mov_banc', 'cuentas_bancarias', 'cuentaBancaria', 'fechaInicio', 'fechaFin'));

@@ -99,14 +99,21 @@
             @endforeach
         </tbody>
     </table>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center">
+        {{ $listado_pagos->links('vendor.pagination.bootstrap-4') }}
+    </div>
+
 </div>
 
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<!-- Scripts comunes centralizados -->
+
+@include('partials.scripts')
 
 <script>
+
     document.addEventListener('DOMContentLoaded', function () {
         var editClientModal = document.getElementById('editClientModal');
         if (editClientModal) {
