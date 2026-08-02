@@ -20,14 +20,6 @@
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
-            <tr>
-                <th><input type="text" id="search-numero-orden" class="form-control" placeholder="ID"></th>
-                <th><input type="text" id="search-promesa-entrega" class="form-control" placeholder="Fecha"></th>
-                <th><input type="text" id="search-nombre-cliente" class="form-control" placeholder="Nombre Cliente"></th>
-                <th><input type="text" id="search-monto-orden" class="form-control" placeholder="Monto de la Orden"></th>
-                <th><input type="text" id="search-saldo-pendiente" class="form-control" placeholder="Saldo de la Orden"></th>
-                <th></th>
-            </tr>
         </thead>
         <tbody id="ordenes-table">
             @foreach($ordenes as $order)
@@ -73,54 +65,4 @@
         {{ $ordenes->links('vendor.pagination.bootstrap-4') }}
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById("search-numero-orden").value = '';
-    document.getElementById("search-nombre-cliente").value = '';
-    document.getElementById("search-monto-orden").value = '';
-    document.getElementById("search-saldo-pendiente").value = '';
-    document.getElementById("search-promesa-entrega").value = '';
-
-    function filterTable() {
-        var numeroOrden = document.getElementById('search-numero-orden').value.toLowerCase();
-        var nombreCliente = document.getElementById('search-nombre-cliente').value.toLowerCase();
-        var montoOrden = document.getElementById('search-monto-orden').value.toLowerCase();
-        var saldoPendiente = document.getElementById('search-saldo-pendiente').value.toLowerCase();
-        var promesaEntrega = document.getElementById('search-promesa-entrega').value.toLowerCase();
-
-        var table = document.getElementById('ordenes-table');
-        var rows = table.getElementsByTagName('tr');
-
-        for (var i = 0; i < rows.length; i++) {
-            var cells = rows[i].getElementsByTagName('td');
-            var showRow = true;
-
-            if (numeroOrden && cells[0].innerText.toLowerCase().indexOf(numeroOrden) === -1) {
-                showRow = false;
-            }
-            if (nombreCliente && cells[1].innerText.toLowerCase().indexOf(nombreCliente) === -1) {
-                showRow = false;
-            }
-            if (montoOrden && cells[2].innerText.toLowerCase().indexOf(montoOrden) === -1) {
-                showRow = false;
-            }
-            if (saldoPendiente && cells[3].innerText.toLowerCase().indexOf(saldoPendiente) === -1) {
-                showRow = false;
-            }
-            if (promesaEntrega && cells[4].innerText.toLowerCase().indexOf(promesaEntrega) === -1) {
-                showRow = false;
-            }
-
-            rows[i].style.display = showRow ? '' : 'none';
-        }
-    }
-
-    document.getElementById('search-numero-orden').addEventListener('keyup', filterTable);
-    document.getElementById('search-nombre-cliente').addEventListener('keyup', filterTable);
-    document.getElementById('search-monto-orden').addEventListener('keyup', filterTable);
-    document.getElementById('search-saldo-pendiente').addEventListener('keyup', filterTable);
-    document.getElementById('search-promesa-entrega').addEventListener('keyup', filterTable);
-});
-</script>
 @stop
