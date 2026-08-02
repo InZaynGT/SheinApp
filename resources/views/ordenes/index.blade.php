@@ -3,7 +3,7 @@
 @section('title', 'Listado de Órdenes')
 
 @section('content_header')
-    <h1 class="m-0 text-dark">Listado de Órdenes</h1>
+<h1 class="m-0 text-dark">Listado de Órdenes</h1>
 @stop
 
 @section('content')
@@ -16,14 +16,22 @@
         <div class="card-body">
             <form method="GET" action="{{ route('ordenes.index') }}" class="form-inline">
                 <div class="form-group mr-2">
+                    <label for="nombre_cliente" class="mr-2">Nombre Cliente:</label>
+                    <input type="text" name="nombre_cliente" id="nombre_cliente" class="form-control"
+                        value="{{ $nombreCliente ?? '' }}" placeholder="Empieza a escribir" autocomplete="off">
+                    <input type="hidden" name="id_cliente" id="id_cliente" value="{{ $idCliente ?? '' }}">
+                    <div id="cliente-suggestions" class="list-group" style="position:absolute; z-index:1000; display:none;"></div>
+                </div>
+
+                <div class="form-group mr-2">
                     <label for="fecha_inicio" class="mr-2">Fecha Inicial:</label>
                     <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control"
-                           value="{{ $fechaInicio ?? '' }}">
+                        value="{{ $fechaInicio ?? '' }}">
                 </div>
                 <div class="form-group mr-2">
                     <label for="fecha_fin" class="mr-2">Fecha Final:</label>
                     <input type="date" name="fecha_fin" id="fecha_fin" class="form-control"
-                           value="{{ $fechaFin ?? '' }}">
+                        value="{{ $fechaFin ?? '' }}">
                 </div>
                 <button type="submit" class="btn btn-primary mr-2">
                     <i class="fas fa-search"></i> Buscar
@@ -59,24 +67,24 @@
                 <td>Q. {{ number_format($order->CXC->saldoDocto,2) }}</td>
                 <td>
                     @switch($order->estado)
-                        @case(0)
-                            <span class="badge badge-warning">Solicitado</span>
-                            @break
-                        @case(1)
-                            <span class="badge badge-danger">Cancelado</span>
-                            @break
-                        @case(2)
-                            <span class="badge badge-success">Confirmado</span>
-                            @break
-                        @case(3)
-                            <span class="badge badge-primary">En Bodega</span>
-                            @break
-                        @case(4)
-                            <span class="badge badge-orange" style="background-color: orange;">Parcialmente pagado</span>
-                            @break
-                        @case(5)
-                            <i class="fas fa-check text-success"></i>
-                            @break
+                    @case(0)
+                    <span class="badge badge-warning">Solicitado</span>
+                    @break
+                    @case(1)
+                    <span class="badge badge-danger">Cancelado</span>
+                    @break
+                    @case(2)
+                    <span class="badge badge-success">Confirmado</span>
+                    @break
+                    @case(3)
+                    <span class="badge badge-primary">En Bodega</span>
+                    @break
+                    @case(4)
+                    <span class="badge badge-orange" style="background-color: orange;">Parcialmente pagado</span>
+                    @break
+                    @case(5)
+                    <i class="fas fa-check text-success"></i>
+                    @break
                     @endswitch
                 </td>
                 <td>
@@ -94,3 +102,56 @@
     </div>
 </div>
 @stop
+
+@section('adminlte_js')
+<script>
+    $(document).ready(function () {
+        var searchUrl = "{{ route('buscar.cliente') }}";
+        var suggestions = $('#cliente-suggestions');
+        var nombreInput = $('#nombre_cliente');
+        var idInput = $('#id_cliente');
+
+        nombreInput.on('input', function () {
+            var term = $(this).val().trim();
+            if (term.length < 3) {
+                suggestions.hide().empty();
+                idInput.val('');
+                return;
+            }
+            $.ajax({
+                url: searchUrl,
+                method: 'GET',
+                data: { term: term },
+                dataType: 'json',
+                success: function (data) {
+                    suggestions.empty();
+                    if (data.length === 0) {
+                        suggestions.hide();
+                        return;
+                    }
+                    $.each(data, function (index, cliente) {
+                        var item = $('<a href="#" class="list-group-item list-group-item-action"></a>')
+                            .text(cliente.nombre)
+                            .on('click', function (e) {
+                                e.preventDefault();
+                                nombreInput.val(cliente.nombre);
+                                idInput.val(cliente.id);
+                                suggestions.hide().empty();
+                            });
+                        suggestions.append(item);
+                    });
+                    suggestions.show();
+                }
+            });
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#nombre_cliente, #cliente-suggestions').length) {
+                suggestions.hide();
+            }
+        });
+    });
+</script>
+@stop
+
+

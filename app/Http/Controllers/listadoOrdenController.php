@@ -4,35 +4,40 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\OrdenModel;
+use App\Models\clienteModel;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Livewire\Component;
+
 
 class listadoOrdenController extends Controller
 {
     public function index(Request $request)
     {
-        // Obtenemos los parámetros de filtro enviados por el formulario (GET)
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin    = $request->input('fecha_fin');
+        $idCliente   = $request->input('id_cliente');
+        $nombreCliente = '';
 
-        // Construimos la consulta base con las relaciones y el orden
         $query = OrdenModel::with('cliente', 'CXC')->orderBy('id', 'desc');
-
-        // Aplicamos el filtro de fecha inicial (>=) si viene definido
         if ($fechaInicio) {
             $query->whereDate('fechaPromesa', '>=', $fechaInicio);
         }
 
-        // Aplicamos el filtro de fecha final (<=) si viene definido
         if ($fechaFin) {
             $query->whereDate('fechaPromesa', '<=', $fechaFin);
         }
 
-        // Paginamos conservando los parámetros de filtro en los enlaces de paginación
+        if ($idCliente) {
+            $query->where('idCliente', $idCliente);
+            $cliente = clienteModel::find($idCliente);
+            $nombreCliente = $cliente ? $cliente->nombre : '';
+        }
+
         $ordenes = $query->paginate(50)->withQueryString();
 
-        // Retornamos la vista y pasamos las variables de ordenes y los filtros activos
-        return view('ordenes.index', compact('ordenes', 'fechaInicio', 'fechaFin'));
+        return view('ordenes.index', compact('ordenes', 'fechaInicio', 'fechaFin', 'idCliente', 'nombreCliente'));
+
+
     }
 
     public function show($id)
