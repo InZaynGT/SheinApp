@@ -8,8 +8,36 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Área de Filtros -->
+    <div class="card card-outline card-primary mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros</h3>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('ordenes.index') }}" class="form-inline">
+                <div class="form-group mr-2">
+                    <label for="fecha_inicio" class="mr-2">Fecha Inicial:</label>
+                    <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control"
+                           value="{{ $fechaInicio ?? '' }}">
+                </div>
+                <div class="form-group mr-2">
+                    <label for="fecha_fin" class="mr-2">Fecha Final:</label>
+                    <input type="date" name="fecha_fin" id="fecha_fin" class="form-control"
+                           value="{{ $fechaFin ?? '' }}">
+                </div>
+                <button type="submit" class="btn btn-primary mr-2">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="{{ route('ordenes.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-eraser"></i> Limpiar
+                </a>
+            </form>
+        </div>
+    </div>
+
     <!-- Tabla de Órdenes -->
     <table class="table table-striped">
+
         <thead>
             <tr>
                 <th>ID</th>
