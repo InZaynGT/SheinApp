@@ -37,7 +37,7 @@
                     <i class="fas fa-search"></i> Buscar
                 </button>
                 <a href="{{ route('ordenes.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-eraser"></i> Limpiar
+                    <i class="fas fa-eraser"></i> Reestablecer filtros
                 </a>
             </form>
         </div>

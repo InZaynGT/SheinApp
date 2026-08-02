@@ -2,21 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\clienteModel;
 use Illuminate\Http\Request;
+use App\Models\clienteModel;
 use App\Models\OrdenModel;
 use App\Models\OrdenDetalleModel;
 use App\Models\CxcDocumentoModel;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 
-class crearOrdenController extends Controller
+class OrdenController extends Controller
 {
-    public function index()
+    /**
+     * Muestra el listado de órdenes con filtros opcionales.
+     */
+    public function index(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin    = $request->input('fecha_fin');
+        $idCliente   = $request->input('id_cliente');
+        $nombreCliente = '';
+
+        $query = OrdenModel::with('cliente', 'CXC')->orderBy('id', 'desc');
+        if ($fechaInicio) {
+            $query->whereDate('fechaPromesa', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('fechaPromesa', '<=', $fechaFin);
+        }
+
+        if ($idCliente) {
+            $query->where('idCliente', $idCliente);
+            $cliente = clienteModel::find($idCliente);
+            $nombreCliente = $cliente ? $cliente->nombre : '';
+        }
+
+        $ordenes = $query->paginate(50)->withQueryString();
+
+        return view('ordenes.index', compact('ordenes', 'fechaInicio', 'fechaFin', 'idCliente', 'nombreCliente'));
+    }
+
+    /**
+     * Muestra el formulario para crear una nueva orden.
+     */
+    public function create()
     {
         $clientes = clienteModel::all();
         return view('ordenes.crearOrden', compact('clientes'));
     }
 
+    /**
+     * Almacena una nueva orden con sus detalles y documento CXC.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -75,5 +112,30 @@ class crearOrdenController extends Controller
             DB::rollback();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Muestra el detalle de una orden específica.
+     */
+    public function show($id)
+    {
+        // Obtén la orden y sus detalles
+        $orden = OrdenModel::with('cliente', 'detalleOrden')->findOrFail($id);
+
+        // Retorna la vista con los datos de la orden
+        return view('ordenes.detalleOrden', compact('orden'));
+    }
+
+    /**
+     * Genera el reporte PDF de una orden.
+     */
+    public function generateReport($id)
+    {
+        // Obtén la orden y sus detalles
+        $orden = OrdenModel::with('cliente', 'detalleOrden')->findOrFail($id);
+
+        $pdf = FacadePdf::loadView('reports.voting-result', compact('orden'));
+
+        return $pdf->stream();
     }
 }

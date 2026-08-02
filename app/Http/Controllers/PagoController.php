@@ -2,21 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AnticipoDETModel;
-use App\Models\AnticipoModel;
 use Illuminate\Http\Request;
-use App\Models\clienteModel;
-use App\Models\CxcDocumentoModel;
-use App\Models\PagoDetModel;
-use App\Models\OrdenModel;
-use App\Models\FormaPago;
-use App\Models\cuentaBancariaModel;
 use App\Models\PagoEnc;
+use App\Models\PagoDetModel;
+use App\Models\CxcDocumentoModel;
+use App\Models\OrdenModel;
+use App\Models\AnticipoModel;
+use App\Models\AnticipoDETModel;
+use App\Models\cuentaBancariaModel;
+use App\Models\clienteModel;
+use App\Models\FormaPago;
 use Illuminate\Support\Facades\DB;
 
-class DeudoresController extends Controller
+use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
+use App\Http\Controllers\AnticipoController;
+
+
+class PagoController extends Controller
 {
-    //DE PREFERENCIA CARGAR LO QUE NECESITAMOS DE UNA VEZ CON EL INDEX (CLIENTE PENDIENTE DE MODIFICAR)
+    /**
+     * Muestra el formulario de registro de pagos (deudores).
+     */
     public function index()
     {
         $clientes = clienteModel::all();
@@ -25,49 +31,23 @@ class DeudoresController extends Controller
         return view('deudores.index', compact('clientes', 'formasPago', 'cuentasBancarias'));
     }
 
-    // En tu controlador
-    public function buscarCliente(Request $request)
+    /**
+     * Muestra el listado de pagos registrados.
+     */
+    public function consultaPagos()
     {
-        $term = $request->get('term');
-        $clientes = clienteModel::where('nombre', 'LIKE', '%' . $term . '%')->get(); // Aquí buscas coincidencias
-        return response()->json($clientes);
-    }
-
-
-    public function getDocumentosDeudores($idCliente)
-    {
-        $documentos = CxcDocumentoModel::where('idCliente', $idCliente)
-            ->where('saldoDocto', '>', 0)->get();
-        return response()->json($documentos);
-    }
-
-    public function getPagosAplicados($idDocumento)
-    {
-        // Obtener pagos aplicados para un documento específico
-        $pagosAplicados = PagoDetModel::where('ID_CXC', $idDocumento)
-            ->with(['pagoEnc.formaPago'])
+        $listado_pagos = PagoEnc::with(['Clientes', 'formaPago', 'CuentasBancarias.Bancos', 'PagosDet.orden'])
+            ->where('pago_enc.estado', '=', '1')
+            ->orderBy('id', 'desc')
             ->get();
-        // Retornar los datos en formato JSON
-        return response()->json($pagosAplicados);
-    }
 
-    public function getAnticipos($idCliente)
-    {
-        $totalAnticipos = DB::table('anticipoenc')
-            ->where('idCliente', $idCliente)
-            ->sum('anticipoRestante');
-        // Retornar los datos en formato JSON
-        return response()->json($totalAnticipos);
-    }
-
-    public static function obtenerAnticiposRestantes($idCliente)
-    {
-        return AnticipoModel::where('idCliente', $idCliente)
-            ->where('anticipoRestante', '>', 0)
-            ->get();
+        return view('deudores.consulta_pagos', compact('listado_pagos'));
     }
 
 
+    /**
+     * Registra un nuevo pago y aplica el monto a los documentos seleccionados.
+     */
     public function store(Request $request)
     {
         $clienteId = $request->input('cliente_id');
@@ -83,13 +63,14 @@ class DeudoresController extends Controller
 
         try {
             if ($formaPago == 5) {
-                $Deudores = new DeudoresController;
-                $response = $Deudores->getAnticipos($clienteId);
+                $anticipoController = new AnticipoController;
+                $response = $anticipoController->getAnticipos($clienteId);
                 $totalAnticipos = json_decode($response->getContent(), true);
                 if ($totalAnticipos < $montoTotal) {
                     throw new \Exception("El anticipo actual es menor que el anticipo por usar.");
                 }
             }
+
             if ($formaPago != 5) {
                 $pagoEnc = PagoEnc::create([
                     'idCliente' => $clienteId,
@@ -126,7 +107,8 @@ class DeudoresController extends Controller
                 return strtotime($a['fechaDocto']) - strtotime($b['fechaDocto']);
             });
 
-            $anticipos_lista = $this->obtenerAnticiposRestantes($clienteId)->toArray();
+            $anticipos_lista = AnticipoController::obtenerAnticiposRestantes($clienteId)->toArray();
+
 
             usort($anticipos_lista, function ($a, $b) {
                 return strtotime($a['fecha']) - strtotime($b['fecha']);
@@ -199,7 +181,6 @@ class DeudoresController extends Controller
                             $montoAplicado = min($documento['saldo'], $montoTotal);
                             $ordenEnc = OrdenModel::where('id', $cxcDocumento->Nro_docto)->firstOrFail();
 
-
                             if ($montoAplicado > 0) {
                                 $cxcDocumento->saldoDocto -= $montoAplicado;
                                 $cxcDocumento->nroPagos += 1;
@@ -228,9 +209,6 @@ class DeudoresController extends Controller
                 }
             }
 
-            //$montoTotalInicial = $montoTotal;
-
-
             DB::commit();
             if ($formaPago != 5) {
                 return response()->json(['success' => true, 'orden_id' => $pagoEnc->id]);
@@ -243,7 +221,9 @@ class DeudoresController extends Controller
         }
     }
 
-
+    /**
+     * Registra un nuevo anticipo para un cliente.
+     */
     public function storeAnticipo(Request $request)
     {
         //se inserta aplicado = 0 debido a que es un nuevo anticipo que no se ha usado para nada.
@@ -304,7 +284,19 @@ class DeudoresController extends Controller
             $cuentaBancariaModel->save();
         }
 
-
         return response()->json(['success' => true, 'orden_id' => $pagoEnc->id]);
+    }
+
+    /**
+     * Genera el reporte PDF de un pago.
+     */
+    public function generateReport($id)
+    {
+        $listado_pagos = PagoEnc::with(['Clientes', 'formaPago', 'CuentasBancarias.Bancos', 'PagosDet.orden'])
+            ->where('id', '=', $id)->get();
+
+        $pdf = FacadePdf::loadView('reports.listado_pagos', compact('listado_pagos'));
+
+        return $pdf->stream();
     }
 }
