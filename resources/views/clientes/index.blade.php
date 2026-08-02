@@ -8,6 +8,36 @@
 
 @section('content')
 <div class="container-fluid px-2 px-md-3">
+    <!-- Área de Filtros -->
+    <div class="card card-outline card-primary mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros</h3>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('clientes.index') }}" class="form-inline">
+                <div class="form-group mr-2">
+                    <label for="nombre" class="mr-2">Nombre:</label>
+                    <input type="text" name="nombre" id="nombre" class="form-control"
+                        value="{{ $nombre ?? '' }}" placeholder="Buscar por nombre" autocomplete="off">
+                </div>
+                <div class="form-group mr-2">
+                    <label for="tipo_cliente" class="mr-2">Tipo de Cliente:</label>
+                    <select name="tipo_cliente" id="tipo_cliente" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="1" {{ ($tipoCliente ?? '') == '1' ? 'selected' : '' }}>Hombre</option>
+                        <option value="2" {{ ($tipoCliente ?? '') == '2' ? 'selected' : '' }}>Mujer</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mr-2">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="{{ route('clientes.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-eraser"></i> Reestablecer filtros
+                </a>
+            </form>
+        </div>
+    </div>
+
     <div class="row mb-3">
         <div class="col-12 col-md-3 mb-2 mb-md-0">
             <button type="button" class="btn btn-success w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addClientModal">
@@ -15,6 +45,7 @@
             </button>
         </div>
     </div>
+
 
     <div class="table-responsive">
         <table class="table table-striped table-hover table-sm" id="clientsTable">

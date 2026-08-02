@@ -9,15 +9,34 @@ use App\Models\Movimiento_Bancario;
 class MovimientoBancarioController extends Controller
 {
     /**
-     * Muestra el listado de movimientos bancarios.
+     * Muestra el listado de movimientos bancarios con filtros opcionales.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $mov_banc = Movimiento_Bancario::orderBy('id', 'desc')->get();
+        $cuentaBancaria = $request->input('cuenta_bancaria');
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
+
+        $query = Movimiento_Bancario::orderBy('id', 'desc');
+
+        if ($cuentaBancaria) {
+            $query->where('ID_CUENTA_BANCARIA', $cuentaBancaria);
+        }
+
+        if ($fechaInicio) {
+            $query->whereDate('fecha', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('fecha', '<=', $fechaFin);
+        }
+
+        $mov_banc = $query->get();
         $cuentas_bancarias = cuentaBancariaModel::all();
 
-        return view('movimientos.index', compact('mov_banc', 'cuentas_bancarias'));
+        return view('movimientos.index', compact('mov_banc', 'cuentas_bancarias', 'cuentaBancaria', 'fechaInicio', 'fechaFin'));
     }
+
 
     /**
      * Registra un nuevo movimiento bancario y actualiza el saldo de la cuenta.

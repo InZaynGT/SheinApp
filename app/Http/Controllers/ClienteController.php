@@ -8,13 +8,28 @@ use App\Models\clienteModel;
 class ClienteController extends Controller
 {
     /**
-     * Muestra el listado de clientes activos.
+     * Muestra el listado de clientes activos con filtros opcionales.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clientes = clienteModel::where('estado', 1)->get();
-        return view('clientes.index', compact('clientes'));
+        $nombre = $request->input('nombre');
+        $tipoCliente = $request->input('tipo_cliente');
+
+        $query = clienteModel::where('estado', 1);
+
+        if ($nombre) {
+            $query->where('nombre', 'LIKE', '%' . $nombre . '%');
+        }
+
+        if ($tipoCliente !== null && $tipoCliente !== '') {
+            $query->where('tipo_cli', $tipoCliente);
+        }
+
+        $clientes = $query->get();
+
+        return view('clientes.index', compact('clientes', 'nombre', 'tipoCliente'));
     }
+
 
     /**
      * Muestra el formulario para crear un nuevo cliente.

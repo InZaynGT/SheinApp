@@ -32,17 +32,44 @@ class PagoController extends Controller
     }
 
     /**
-     * Muestra el listado de pagos registrados.
+     * Muestra el listado de pagos registrados con filtros opcionales.
      */
-    public function consultaPagos()
+    public function consultaPagos(Request $request)
     {
-        $listado_pagos = PagoEnc::with(['Clientes', 'formaPago', 'CuentasBancarias.Bancos', 'PagosDet.orden'])
-            ->where('pago_enc.estado', '=', '1')
-            ->orderBy('id', 'desc')
-            ->get();
+        $nombre = $request->input('nombre');
+        $formaPago = $request->input('forma_pago');
+        $cuentaBancaria = $request->input('cuenta_bancaria');
+        $nroDocumento = $request->input('nro_documento');
 
-        return view('deudores.consulta_pagos', compact('listado_pagos'));
+        $query = PagoEnc::with(['Clientes', 'formaPago', 'CuentasBancarias.Bancos', 'PagosDet.orden'])
+            ->where('pago_enc.estado', '=', '1');
+
+        if ($nombre) {
+            $query->whereHas('Clientes', function ($q) use ($nombre) {
+                $q->where('nombre', 'LIKE', '%' . $nombre . '%');
+            });
+        }
+
+        if ($formaPago) {
+            $query->where('pago_enc.idPago', $formaPago);
+        }
+
+        if ($cuentaBancaria) {
+            $query->where('pago_enc.ID_CUENTA_BANCARIA', $cuentaBancaria);
+        }
+
+        if ($nroDocumento) {
+            $query->where('pago_enc.NRO_DOCTO_BANCARIO', 'LIKE', '%' . $nroDocumento . '%');
+        }
+
+        $listado_pagos = $query->orderBy('id', 'desc')->get();
+
+        $formasPago = FormaPago::all();
+        $cuentasBancarias = cuentaBancariaModel::all();
+
+        return view('deudores.consulta_pagos', compact('listado_pagos', 'formasPago', 'cuentasBancarias', 'nombre', 'formaPago', 'cuentaBancaria', 'nroDocumento'));
     }
+
 
 
     /**

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FormaPago extends Model
 {
     use HasFactory;
-    protected $table = '_forma__pago';
+    protected $table = 'tipo_pago';
     protected $fiLlable = ['id','nombre'];
 
     public function pagosEnc()

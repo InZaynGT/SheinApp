@@ -8,17 +8,57 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClientModal">
-                Agregar Cliente
-            </button>
+    <!-- Área de Filtros -->
+    <div class="card card-outline card-primary mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros</h3>
         </div>
-        <div class="col-md-6">
-            <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre">
+        <div class="card-body">
+            <form method="GET" action="{{ route('deudores.consulta_pagos') }}" class="form-inline">
+                <div class="form-group mr-2">
+                    <label for="nombre" class="mr-2">Nombre Cliente:</label>
+                    <input type="text" name="nombre" id="nombre" class="form-control"
+                        value="{{ $nombre ?? '' }}" placeholder="Buscar por nombre" autocomplete="off">
+                </div>
+                <div class="form-group mr-2">
+                    <label for="forma_pago" class="mr-2">Forma de Pago:</label>
+                    <select name="forma_pago" id="forma_pago" class="form-control">
+                        <option value="">Todas</option>
+                        @foreach($formasPago as $fp)
+                            <option value="{{ $fp->id }}" {{ ($formaPago ?? '') == $fp->id ? 'selected' : '' }}>
+                                {{ $fp->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label for="cuenta_bancaria" class="mr-2">Cuenta Bancaria:</label>
+                    <select name="cuenta_bancaria" id="cuenta_bancaria" class="form-control">
+                        <option value="">Todas</option>
+                        @foreach($cuentasBancarias as $cb)
+                            <option value="{{ $cb->id }}" {{ ($cuentaBancaria ?? '') == $cb->id ? 'selected' : '' }}>
+                                {{ optional($cb->Bancos)->nombre . ' - ' . $cb->nombre_cuenta . ' - ' . $cb->numero_cuenta }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label for="nro_documento" class="mr-2">N°. Documento:</label>
+                    <input type="text" name="nro_documento" id="nro_documento" class="form-control"
+                        value="{{ $nroDocumento ?? '' }}" placeholder="N°. de documento bancario" autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary mr-2">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="{{ route('deudores.consulta_pagos') }}" class="btn btn-secondary">
+                    <i class="fas fa-eraser"></i> Reestablecer filtros
+                </a>
+            </form>
         </div>
     </div>
+
     <table class="table table-striped" id="clientsTable">
+
         <thead>
             <tr>
                 <th>ID</th>
@@ -69,43 +109,30 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var editClientModal = document.getElementById('editClientModal');
-        editClientModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var clientId = button.getAttribute('data-id');
-            var clientName = button.getAttribute('data-nombre');
-            var clientAddress = button.getAttribute('data-direccion');
-            var clientPhone = button.getAttribute('data-telefono');
-            var clientType = button.getAttribute('data-type');
+        if (editClientModal) {
+            editClientModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var clientId = button.getAttribute('data-id');
+                var clientName = button.getAttribute('data-nombre');
+                var clientAddress = button.getAttribute('data-direccion');
+                var clientPhone = button.getAttribute('data-telefono');
+                var clientType = button.getAttribute('data-type');
 
-            var clientIdInput = editClientModal.querySelector('#clientId');
-            var clientNameInput = editClientModal.querySelector('#clientName');
-            var clientAddressInput = editClientModal.querySelector('#clientAddress');
-            var clientPhoneInput = editClientModal.querySelector('#clientPhone');
-            var clientTypeInput = editClientModal.querySelector('#clientType');
+                var clientIdInput = editClientModal.querySelector('#clientId');
+                var clientNameInput = editClientModal.querySelector('#clientName');
+                var clientAddressInput = editClientModal.querySelector('#clientAddress');
+                var clientPhoneInput = editClientModal.querySelector('#clientPhone');
+                var clientTypeInput = editClientModal.querySelector('#clientType');
 
-            clientIdInput.value = clientId;
-            clientNameInput.value = clientName;
-            clientAddressInput.value = clientAddress;
-            clientPhoneInput.value = clientPhone;
-            clientTypeInput.value = clientType;
-        });
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            var searchValue = this.value.toLowerCase();
-            var rows = document.getElementById('clientsTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-            for (var i = 0; i < rows.length; i++) {
-                var nameCell = rows[i].getElementsByTagName('td')[1];
-                var DireccionCell = rows[i].getElementsByTagName('td')[2];
-                var name = nameCell.textContent.toLowerCase();
-                var Direccion = DireccionCell.textContent.toLowerCase();
-
-                if (name.indexOf(searchValue) > -1 || Direccion.indexOf(searchValue) > -1) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
-            }
-        });
+                clientIdInput.value = clientId;
+                clientNameInput.value = clientName;
+                clientAddressInput.value = clientAddress;
+                clientPhoneInput.value = clientPhone;
+                clientTypeInput.value = clientType;
+            });
+        }
     });
 </script>
 @stop
+
+

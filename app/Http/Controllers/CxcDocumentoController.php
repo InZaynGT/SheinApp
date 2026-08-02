@@ -20,8 +20,18 @@ class CxcDocumentoController extends Controller
             ->groupBy('cxcdocumento.idCliente', 'clientes.nombre')
             ->get();
 
+        // Obtener los documentos pendientes de cada deudor (ordenados del más antiguo al más reciente)
+        foreach ($deudores as $deudor) {
+            $deudor->documentos = CxcDocumentoModel::where('idCliente', $deudor->idCliente)
+                ->where('saldoDocto', '>', 0)
+                ->orderBy('fechaDocto', 'asc')
+                ->orderBy('id', 'asc')
+                ->get();
+        }
+
         return view('deudores.listado_deudores', compact('deudores'));
     }
+
 
     /**
      * Obtiene los documentos con saldo pendiente de un cliente.

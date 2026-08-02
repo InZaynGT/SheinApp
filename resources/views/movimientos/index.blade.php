@@ -8,17 +8,53 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Área de Filtros -->
+    <div class="card card-outline card-primary mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros</h3>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('movimientos.index') }}" class="form-inline">
+                <div class="form-group mr-2">
+                    <label for="cuenta_bancaria" class="mr-2">Cuenta Bancaria:</label>
+                    <select name="cuenta_bancaria" id="cuenta_bancaria" class="form-control">
+                        <option value="">Todas</option>
+                        @foreach($cuentas_bancarias as $cuenta)
+                            <option value="{{ $cuenta->id }}" {{ ($cuentaBancaria ?? '') == $cuenta->id ? 'selected' : '' }}>
+                                {{ $cuenta->Bancos->nombre . " - " . $cuenta->nombre_cuenta . " - " . $cuenta->numero_cuenta }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label for="fecha_inicio" class="mr-2">Fecha Inicial:</label>
+                    <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control"
+                        value="{{ $fechaInicio ?? '' }}">
+                </div>
+                <div class="form-group mr-2">
+                    <label for="fecha_fin" class="mr-2">Fecha Final:</label>
+                    <input type="date" name="fecha_fin" id="fecha_fin" class="form-control"
+                        value="{{ $fechaFin ?? '' }}">
+                </div>
+                <button type="submit" class="btn btn-primary mr-2">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="{{ route('movimientos.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-eraser"></i> Reestablecer filtros
+                </a>
+            </form>
+        </div>
+    </div>
+
     <div class="row mb-3">
         <div class="col-md-6">
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClientModal">
                 Agregar Movimiento
             </button>
         </div>
-        <div class="col-md-6">
-            <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre">
-        </div>
     </div>
     <table class="table table-striped" id="clientsTable">
+
         <thead>
             <tr>
                 <th>ID</th>
@@ -161,43 +197,30 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var editClientModal = document.getElementById('editClientModal');
-        editClientModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var clientId = button.getAttribute('data-id');
-            var clientName = button.getAttribute('data-nombre');
-            var clientAddress = button.getAttribute('data-direccion');
-            var clientPhone = button.getAttribute('data-telefono');
-            var clientType = button.getAttribute('data-type');
+        if (editClientModal) {
+            editClientModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var clientId = button.getAttribute('data-id');
+                var clientName = button.getAttribute('data-nombre');
+                var clientAddress = button.getAttribute('data-direccion');
+                var clientPhone = button.getAttribute('data-telefono');
+                var clientType = button.getAttribute('data-type');
 
-            var clientIdInput = editClientModal.querySelector('#clientId');
-            var clientNameInput = editClientModal.querySelector('#clientName');
-            var clientAddressInput = editClientModal.querySelector('#clientAddress');
-            var clientPhoneInput = editClientModal.querySelector('#clientPhone');
-            var clientTypeInput = editClientModal.querySelector('#clientType');
+                var clientIdInput = editClientModal.querySelector('#clientId');
+                var clientNameInput = editClientModal.querySelector('#clientName');
+                var clientAddressInput = editClientModal.querySelector('#clientAddress');
+                var clientPhoneInput = editClientModal.querySelector('#clientPhone');
+                var clientTypeInput = editClientModal.querySelector('#clientType');
 
-            clientIdInput.value = clientId;
-            clientNameInput.value = clientName;
-            clientAddressInput.value = clientAddress;
-            clientPhoneInput.value = clientPhone;
-            clientTypeInput.value = clientType;
-        });
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            var searchValue = this.value.toLowerCase();
-            var rows = document.getElementById('clientsTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-            for (var i = 0; i < rows.length; i++) {
-                var nameCell = rows[i].getElementsByTagName('td')[1];
-                var DireccionCell = rows[i].getElementsByTagName('td')[2];
-                var name = nameCell.textContent.toLowerCase();
-                var Direccion = DireccionCell.textContent.toLowerCase();
-
-                if (name.indexOf(searchValue) > -1 || Direccion.indexOf(searchValue) > -1) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
-            }
-        });
+                clientIdInput.value = clientId;
+                clientNameInput.value = clientName;
+                clientAddressInput.value = clientAddress;
+                clientPhoneInput.value = clientPhone;
+                clientTypeInput.value = clientType;
+            });
+        }
     });
 </script>
 @stop
+
+

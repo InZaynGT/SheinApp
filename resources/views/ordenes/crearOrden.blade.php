@@ -12,12 +12,12 @@
             @csrf
             <!-- Cliente -->
             <div class="mb-3">
-                <label for="cliente_id" class="form-label">Cliente</label>
-                <input type="text" class="form-control" id="cliente_id" name="cliente_id" readonly required>
-                <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal"
-                    data-bs-target="#buscarClienteModal">
-                    Buscar Cliente
-                </button>
+                <label for="cliente_nombre" class="form-label">Cliente</label>
+                <input type="text" class="form-control" id="cliente_nombre" name="cliente_nombre"
+                    placeholder="Empieza a escribir el nombre del cliente" autocomplete="off" required>
+                <input type="hidden" name="cliente_id" id="cliente_id">
+                <div id="cliente-suggestions" class="list-group"
+                    style="position:absolute; z-index:1000; display:none; max-width: 500px;"></div>
             </div>
             <!-- Fecha de Orden -->
             <div class="mb-3">
@@ -69,48 +69,6 @@
             <!-- Botón para Guardar Orden -->
             <button type="button" class="btn btn-primary mt-3" id="guardar_orden">Guardar Orden</button>
         </form>
-
-        <!-- Modal para Buscar Cliente -->
-        <div class="modal fade" id="buscarClienteModal" tabindex="-1" aria-labelledby="buscarClienteModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="buscarClienteModalLabel">Buscar Cliente</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre</th>
-                                    <th>Dirección</th>
-                                    <th>Teléfono</th>
-                                    <th>Seleccionar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($clientes as $cliente)
-                                    <tr>
-                                        <td>{{ $cliente->id }}</td>
-                                        <td>{{ $cliente->nombre }}</td>
-                                        <td>{{ $cliente->direccion }}</td>
-                                        <td>{{ $cliente->telefono }}</td>
-                                        <td>
-                                            <button type="button" class="btn btn-primary seleccionar-cliente"
-                                                data-id="{{ $cliente->id }}" data-nombre="{{ $cliente->nombre }}">
-                                                Seleccionar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Scripts -->
@@ -119,11 +77,51 @@
 
     <script>
         $(document).ready(function() {
-            // Seleccionar cliente
-            $('.seleccionar-cliente').on('click', function() {
-                var clienteId = $(this).data('id');
-                $('#cliente_id').val(clienteId);
-                $('#buscarClienteModal').modal('hide');
+            var searchUrl = "{{ route('buscar.cliente') }}";
+            var suggestions = $('#cliente-suggestions');
+            var nombreInput = $('#cliente_nombre');
+            var idInput = $('#cliente_id');
+
+            // Autocompletado de cliente a partir del 3er caracter
+            nombreInput.on('input', function() {
+                var term = $(this).val().trim();
+                if (term.length < 3) {
+                    suggestions.hide().empty();
+                    idInput.val('');
+                    return;
+                }
+                $.ajax({
+                    url: searchUrl,
+                    method: 'GET',
+                    data: { term: term },
+                    dataType: 'json',
+                    success: function(data) {
+                        suggestions.empty();
+                        if (data.length === 0) {
+                            suggestions.hide();
+                            return;
+                        }
+                        $.each(data, function(index, cliente) {
+                            var item = $('<a href="#" class="list-group-item list-group-item-action"></a>')
+                                .text(cliente.nombre)
+                                .on('click', function(e) {
+                                    e.preventDefault();
+                                    nombreInput.val(cliente.nombre);
+                                    idInput.val(cliente.id);
+                                    suggestions.hide().empty();
+                                });
+                            suggestions.append(item);
+                        });
+                        suggestions.show();
+                    }
+                });
+            });
+
+            // Ocultar sugerencias al hacer clic fuera
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#cliente_nombre, #cliente-suggestions').length) {
+                    suggestions.hide();
+                }
             });
 
             // Agregar producto a la tabla
@@ -196,6 +194,7 @@
                             // Abrir una nueva ventana con el PDF
                             window.open('/impresion_orden/' + response.orden_id, '_blank');
                             // Limpiar campos y tabla después de guardar
+                            $('#cliente_nombre').val('');
                             $('#cliente_id').val('');
                             $('#fecha_promesa').val('');
                             $('#productos_table tbody').empty();
