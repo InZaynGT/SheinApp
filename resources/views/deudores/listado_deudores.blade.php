@@ -9,11 +9,11 @@
 @section('css')
     <style>
         /* Rotación del indicador del accordion al abrir/cerrar */
-        .accordion .card-header .accordion-chevron {
+        .accordion .accordion-chevron {
             transition: transform .2s ease-in-out;
         }
 
-        .accordion .card-header button:not(.collapsed) .accordion-chevron {
+        .accordion button:not(.collapsed) .accordion-chevron {
             transform: rotate(180deg);
         }
     </style>
@@ -52,9 +52,6 @@
 
 </div>
 
-<!-- Scripts comunes centralizados -->
-
-@include('partials.scripts')
 @stop
 
 
