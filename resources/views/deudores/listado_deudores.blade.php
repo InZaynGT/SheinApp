@@ -6,6 +6,19 @@
     <h1 class="m-0 text-dark">Clientes Pendientes de Pago</h1>
 @stop
 
+@section('css')
+    <style>
+        /* Rotación del indicador del accordion al abrir/cerrar */
+        .accordion .card-header .accordion-chevron {
+            transition: transform .2s ease-in-out;
+        }
+
+        .accordion .card-header button:not(.collapsed) .accordion-chevron {
+            transform: rotate(180deg);
+        }
+    </style>
+@stop
+
 @section('content')
 <div class="container-fluid">
     <table class="table table-striped" id="clientsTable">
@@ -13,7 +26,7 @@
             <tr>
                 <th>Nombre del Cliente</th>
                 <th>Saldo pendiente</th>
-                <th>Documentos pendientes (ID Orden / Fecha / Monto)</th>
+                <th style="min-width: 280px;">Documentos pendientes (ID Orden / Fecha / Monto)</th>
             </tr>
         </thead>
         <tbody>
@@ -22,15 +35,10 @@
                 <td>{{ $order->cliente->nombre }}</td>
                 <td>Q. {{ number_format($order->saldo_total,2)}}</td>
                 <td>
-                    @if($order->documentos->count() > 0)
-                        @foreach($order->documentos as $doc)
-                            <span class="text-danger">
-                                #{{ $doc->Nro_docto }} - {{ \Carbon\Carbon::parse($doc->fechaDocto)->format('d/m/Y') }} - Q. {{ number_format($doc->saldoDocto,2) }}
-                            </span><br>
-                        @endforeach
-                    @else
-                        <span class="text-muted">Sin documentos pendientes</span>
-                    @endif
+                    @include('deudores.partials.documentos_pendientes_accordion', [
+                        'documentos' => $order->documentos,
+                        'clienteId'  => $order->idCliente,
+                    ])
                 </td>
             </tr>
             @endforeach
@@ -47,9 +55,6 @@
 <!-- Scripts comunes centralizados -->
 
 @include('partials.scripts')
-
-<script>
-</script>
 @stop
 
 
