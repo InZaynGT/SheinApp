@@ -27,12 +27,23 @@ jobs:
             git reset --hard origin/main
             export COMPOSER_ALLOW_SUPERUSER=1
             composer install --no-dev --optimize-autoloader --no-interaction
-            php artisan cache:clear
-            php artisan config:clear
-            php artisan view:clear
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+
+            # Asegurar permisos de escritura para el usuario de Apache (www-data)
+            # sobre storage y bootstrap/cache. Sin esto, al compilar vistas nuevas
+            # en runtime se produce "Permission denied" (HTTP 500).
+            chown -R www-data:www-data storage bootstrap/cache
+            chmod -R 775 storage bootstrap/cache
+
+            sudo -u www-data php artisan cache:clear
+            sudo -u www-data php artisan config:clear
+            sudo -u www-data php artisan view:clear
+            sudo -u www-data php artisan migrate --force
+
+            # Generar los caches como www-data para que los archivos compilados
+            # pertenezcan al usuario que atiende las peticiones HTTP.
+            sudo -u www-data php artisan config:cache
+            sudo -u www-data php artisan route:cache
+            sudo -u www-data php artisan view:cache
+
             sudo systemctl reload apache2
           EOF
