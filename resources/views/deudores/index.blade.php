@@ -178,9 +178,7 @@
     </div>
 
     <!-- Modal para Ingresar Anticipo -->
-    <div class="modal fade" id="modalAnticipo" tabindex="-1" role="dialog" aria-labelledby="modalAnticipoLabel"
-        aria-hidden="true" data-backdrop="static">
-        aria-hidden="true">
+    <div class="modal fade" id="modalAnticipo" tabindex="-1" role="dialog" aria-labelledby="modalAnticipoLabel" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
