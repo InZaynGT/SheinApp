@@ -472,8 +472,7 @@
                 cuenta_bancaria: document.getElementById('cuenta_bancaria').value
             };
 
-            fetch('{{ route('
-                    pagos.store ') }}', {
+            fetch('{{ route('pagos.store ') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
