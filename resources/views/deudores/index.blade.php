@@ -436,8 +436,7 @@
                 cuenta_bancaria: document.getElementById('anticipo_cuenta_bancaria').value
             };
 
-            fetch('{{ route('
-                    anticipos.store ') }}', {
+            fetch('{{ route('anticipos.store') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
