@@ -83,8 +83,8 @@ class OrdenController extends Controller
                     'SKU' => $producto['SKU'],
                     'talla' => $producto['talla'],
                     'descripcion' => $producto['descripcion'],
-                    'CostoMX' => $producto['costo'],
-                    'CostoGT' => $producto['costo'] * 0.43,
+                    'CostoGT' => $producto['costo'],
+                    // 'CostoGT' => $producto['costo'] * 0.43,
                     'PrecioOfrecido' => $producto['precio'],
                 ]);
             }
