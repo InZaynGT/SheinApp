@@ -41,7 +41,7 @@
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="producto_costo" class="form-label">Costo-MX</label>
+                    <label for="producto_costo" class="form-label">Costo GT</label>
                     <input type="number" class="form-control" id="producto_costo">
                 </div>
                 <div class="col-md-6">
