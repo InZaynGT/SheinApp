@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Orden #{{ $orden->id }}')
+@section('title', 'Orden #' . $orden->id)
 
 @section('content_header')
     <h1 class="m-0 text-dark">Orden #{{ $orden->id }}</h1>
