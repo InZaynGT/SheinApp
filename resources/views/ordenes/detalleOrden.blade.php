@@ -1,14 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Listado de Órdenes')
+@section('title', 'Orden #{{ $orden->id }}')
 
 @section('content_header')
-    <h1 class="m-0 text-dark">Listado de Órdenes</h1>
+    <h1 class="m-0 text-dark">Orden #{{ $orden->id }}</h1>
 @stop
 
 @section('content')
     <div class="container">
-        <h3>Orden #{{ $orden->id }}</h3>
+        <h3></h3>
         <p><strong>Cliente:</strong> {{ $orden->cliente->nombre }}</p>
         <p><strong>Fecha Promesa:</strong> {{ \Carbon\Carbon::parse($orden->fechaPromesa)->format('d F Y') }}</p>
 
